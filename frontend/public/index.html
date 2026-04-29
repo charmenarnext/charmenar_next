@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#667eea" />
+    <meta name="description" content="Charmenar Next - Premium Catering & Event Services" />
+    
+    <!-- Ultra HD Open Graph / Social Media -->
+    <meta property="og:title" content="Charmenar Next" />
+    <meta property="og:description" content="Crafting Memorable Events with Premium Catering Services" />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1555244162-803834f70033?w=1200" />
+    <meta property="og:url" content="http://localhost:3003" />
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    
+    <!-- Manifest for PWA -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <title>Charmenar Next | Premium Catering & Events</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run Charmenar Next.</noscript>
+    
+    <!-- React Root -->
+    <div id="root"></div>
+    
+    <!-- Fallback content while JS loads -->
+    <div id="fallback" style="position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;color:white;font-family:'Poppins',sans-serif;z-index:9999;">
+      <div style="text-align:center">
+        <h1 style="font-family:'Playfair Display',serif;font-size:48px;margin-bottom:20px">Charmenar<span style="background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Next</span></h1>
+        <p>Loading premium experience...</p>
+      </div>
+    </div>
+    
+    <script>
+      // Hide fallback when React loads
+      window.addEventListener('load', function() {
+        setTimeout(() => {
+          const fallback = document.getElementById('fallback');
+          if (fallback) fallback.style.display = 'none';
+        }, 1000);
+      });
+    </script>
+  </body>
+</html>
