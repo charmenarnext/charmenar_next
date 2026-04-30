@@ -37,7 +37,7 @@ const Events = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5010/api/events/submit', {
+      await axios.post('${config.API_URL}/events/submit', {
         eventType: formData.eventType,
         eventName: formData.eventName,
         eventDate: formData.eventDate,

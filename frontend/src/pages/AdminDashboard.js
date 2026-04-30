@@ -48,7 +48,7 @@ const AdminDashboard = () => {
       });
 
       const res = await axios.get(
-        `http://localhost:5010/api/events/admin/all-bookings?${queryParams}`,
+        `${config.API_URL}/events/admin/all-bookings?${queryParams}`,
         {
           headers: { 
             Authorization: `Bearer ${token}`,
@@ -113,7 +113,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://localhost:5010/api/events/admin/update-booking/${id}`, 
+        `${config.API_URL}/events/admin/update-booking/${id}`, 
         { status },
         { 
           headers: { 
@@ -135,7 +135,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.delete(
-        `http://localhost:5010/api/events/admin/delete-booking/${id}`, 
+        `${config.API_URL}/events/admin/delete-booking/${id}`, 
         {
           headers: { 
             Authorization: `Bearer ${token}`,

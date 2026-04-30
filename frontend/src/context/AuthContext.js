@@ -1,10 +1,12 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 const AuthContext = createContext(null);
 
 // ✅ API Base URL using your PORT 5010 and FRONTEND_URL 3003
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5010/api';
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5010/api';
+const API_BASE_URL = config.API_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
