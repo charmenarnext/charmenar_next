@@ -8,10 +8,8 @@ import './AdminLogin.css';
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [step, setStep] = useState(1); // 1 = Email, 2 = OTP
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [timer, setTimer] = useState(0);
   
   const { adminLogin, sendAdminOTP } = useAuth();
   const navigate = useNavigate();
@@ -20,7 +18,8 @@ const AdminLogin = () => {
   const handleRequestOTP = async (e) => {
     e.preventDefault();
     
-    // Validate email
+    console.log('🔐 Requesting OTP for:', email);
+    
     if (!email || !email.includes('@')) {
       toast.error('Please enter a valid email address');
       return;
@@ -29,36 +28,29 @@ const AdminLogin = () => {
     setLoading(true);
     
     try {
+      console.log('📤 Calling sendAdminOTP...');
       await sendAdminOTP(email);
+      console.log('✅ OTP sent successfully');
       toast.success('OTP sent to your email!');
-      setOtpSent(true);
       setStep(2);
-      
-      // Start countdown timer for resend
-      setTimer(30);
-      const interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      
     } catch (error) {
-      console.error('OTP Request Error:', error);
-      toast.error(error.response?.data?.message || 'Failed to send OTP. Please try again.');
+      console.error('❌ OTP Request Error:', error);
+      console.error('Response:', error.response);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Failed to send OTP. Please try again.';
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle OTP Verification & Login
+  // Handle OTP Verification
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     
-    // Validate OTP
     if (!otp || otp.length !== 6) {
       toast.error('Please enter a valid 6-digit OTP');
       return;
@@ -71,36 +63,8 @@ const AdminLogin = () => {
       toast.success('Login successful!');
       navigate('/admin/dashboard');
     } catch (error) {
-      console.error('Login Error:', error);
-      toast.error(error.response?.data?.message || 'Invalid OTP. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle Resend OTP
-  const handleResendOTP = async () => {
-    if (timer > 0) return;
-    
-    setLoading(true);
-    
-    try {
-      await sendAdminOTP(email);
-      toast.success('OTP resent successfully!');
-      setTimer(30);
-      
-      const interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      
-    } catch (error) {
-      toast.error('Failed to resend OTP');
+      console.error('❌ Login Error:', error);
+      toast.error(error.response?.data?.message || 'Invalid OTP');
     } finally {
       setLoading(false);
     }
@@ -118,7 +82,6 @@ const AdminLogin = () => {
             <p>Charmenar Next</p>
           </div>
 
-          {/* Step 1: Email Input */}
           {step === 1 && (
             <form onSubmit={handleRequestOTP} className="admin-login-form">
               <div className="form-group">
@@ -160,7 +123,6 @@ const AdminLogin = () => {
             </form>
           )}
 
-          {/* Step 2: OTP Input */}
           {step === 2 && (
             <form onSubmit={handleVerifyOTP} className="admin-login-form">
               <div className="form-group">
@@ -182,18 +144,14 @@ const AdminLogin = () => {
 
               <div className="otp-info">
                 <p>OTP sent to <strong>{email}</strong></p>
-                {timer > 0 ? (
-                  <p className="timer">Resend OTP in {timer}s</p>
-                ) : (
-                  <button 
-                    type="button" 
-                    className="resend-btn" 
-                    onClick={handleResendOTP}
-                    disabled={loading}
-                  >
-                    Resend OTP
-                  </button>
-                )}
+                <button 
+                  type="button" 
+                  className="resend-btn" 
+                  onClick={handleRequestOTP}
+                  disabled={loading}
+                >
+                  Resend OTP
+                </button>
               </div>
 
               <button 
@@ -221,7 +179,6 @@ const AdminLogin = () => {
                   onClick={() => {
                     setStep(1);
                     setOtp('');
-                    setOtpSent(false);
                   }}
                 >
                   ← Change Email
