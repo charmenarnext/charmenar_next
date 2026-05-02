@@ -74,13 +74,28 @@ app.get('/', (req, res) => {
   });
 });
 
-// ===== 404 Handler =====
+
+// ===== DEBUG: Log all incoming requests =====
+app.use((req, res, next) => {
+  console.log(`🔍 [DEBUG] Request: ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// ===== 404 Handler (must be AFTER all routes) =====
 app.use((req, res, next) => {
   console.warn(`⚠️ 404: Route not found - ${req.method} ${req.originalUrl}`);
   res.status(404).json({
     success: false,
     message: 'Endpoint not found',
-    path: req.originalUrl
+    path: req.originalUrl,
+    availableRoutes: [
+      'GET /api/health',
+      'POST /api/auth/admin/request-otp',
+      'POST /api/auth/admin/login',
+      'POST /api/auth/register',
+      'POST /api/auth/login',
+      'POST /api/events/submit'
+    ]
   });
 });
 

@@ -4,6 +4,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
+console.log('📦 auth.js: Registering admin routes...');
+console.log('   → POST /admin/request-otp');
+console.log('   → POST /admin/login');
 
 // OTP storage (in-memory for now)
 const otpStore = new Map();
@@ -18,7 +21,11 @@ const generateOTP = () => {
 // Request OTP (Step 1)
 router.post('/admin/request-otp', async (req, res) => {
   try {
-    console.log('🔐 Admin OTP Request:', req.body);
+    console.log('🔐 [DEBUG] /admin/request-otp HIT!', {
+      body: req.body,
+      headers: req.headers,
+      ip: req.ip
+    });
     
     const { email } = req.body;
     
