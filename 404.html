@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirecting to Charmenar Next...</title>
+  
+  <!-- Prevent caching issues -->
+  <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <style>
+    /* Minimal loading styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    .loading-container {
+      text-align: center;
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    .loading-container h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+    
+    .loading-container h1 .highlight {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .loading-container p {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 20px;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  
+  <script>
+    (function() {
+      // Base path for your GitHub Pages site (MUST match your repo name)
+      const BASE_PATH = '/charmenar_next';
+      
+      // Get the original path the user tried to access
+      const originalPath = window.location.pathname;
+      const originalSearch = window.location.search;
+      const originalHash = window.location.hash;
+      
+      // Store the full path for React Router to handle
+      const fullPath = originalPath + originalSearch + originalHash;
+      
+      // Save to sessionStorage for React app to read
+      try {
+        sessionStorage.setItem('gh-pages-redirect-path', fullPath);
+      } catch (e) {
+        console.warn('Could not save redirect path:', e);
+      }
+      
+      // Redirect to the base index.html
+      // This loads your React app, which will then read the stored path
+      const redirectUrl = BASE_PATH + '/index.html';
+      
+      // Use replace to avoid adding to browser history
+      window.location.replace(redirectUrl);
+    })();
+  </script>
+</head>
+<body>
+  <noscript>
+    <div style="text-align:center;padding:20px;color:#333;">
+      <h2>JavaScript Required</h2>
+      <p>Charmenar Next requires JavaScript to run. Please enable JavaScript in your browser.</p>
+    </div>
+  </noscript>
+  
+  <div class="loading-container">
+    <h1>Charmenar<span class="highlight">Next</span></h1>
+    <p>Loading your experience...</p>
+    <div class="spinner"></div>
+  </div>
+</body>
+</html>
