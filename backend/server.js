@@ -14,7 +14,7 @@ console.log('🔌 Port:', process.env.PORT || 5010);
 console.log('═══════════════════════════════════════════════════════');
 console.log('');
 
-// ===== CORS Configuration =====
+// ===== CORS Configuration - Allow GitHub Pages =====
 const allowedOrigins = [
   'https://charmenarnext.github.io',
   'https://charmenarnext.github.io/charmenar_next',
@@ -25,7 +25,6 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
     }
@@ -112,6 +111,28 @@ app.get('/', (req, res) => {
   });
 });
 
+// ===== DEBUG ENDPOINTS (for testing - remove in production) =====
+app.get('/api/debug/check', (req, res) => {
+  console.log('🧪 [DEBUG] Check endpoint hit');
+  res.json({
+    success: true,
+    message: 'Backend is alive and responding!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    port: process.env.PORT || 5010
+  });
+});
+
+app.post('/api/debug/test', (req, res) => {
+  console.log('🧪 [DEBUG] Test endpoint hit!', req.body);
+  res.json({
+    success: true,
+    message: 'Backend received your request!',
+    received: req.body,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // ===== 404 Handler (MUST be after all routes) =====
 app.use((req, res, next) => {
   console.warn(`⚠️  404: Route not found - ${req.method} ${req.originalUrl}`);
@@ -123,6 +144,8 @@ app.use((req, res, next) => {
     availableRoutes: [
       'GET  /',
       'GET  /api/health',
+      'GET  /api/debug/check',
+      'POST /api/debug/test',
       'POST /api/auth/admin/request-otp',
       'POST /api/auth/admin/login',
       'POST /api/auth/register',
@@ -222,6 +245,8 @@ mongoose.connect(MONGO_URI, {
       console.log('');
       console.log('📦 Available Endpoints:');
       console.log('   GET  /api/health');
+      console.log('   GET  /api/debug/check');
+      console.log('   POST /api/debug/test');
       console.log('   POST /api/auth/admin/request-otp');
       console.log('   POST /api/auth/admin/login');
       console.log('   POST /api/auth/register');

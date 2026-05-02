@@ -16,56 +16,65 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Get API base URL from config
   const API_BASE_URL = config.API_URL;
 
-  console.log('🔧 AuthContext initialized with API_BASE_URL:', API_BASE_URL);
+  console.log('🔧 AuthContext - API_BASE_URL:', API_BASE_URL);
 
   // Send OTP to admin email
   const sendAdminOTP = async (email) => {
-    console.log('📤 sendAdminOTP called with:', email);
-    console.log('📍 Full URL:', `${API_BASE_URL}/auth/admin/request-otp`);
+    console.log('📤 sendAdminOTP called');
+    console.log('   Email:', email);
+    console.log('   URL:', `${API_BASE_URL}/auth/admin/request-otp`);
     
     try {
       const response = await axios.post(
         `${API_BASE_URL}/auth/admin/request-otp`,
         { email },
         {
-          headers: { 
-            'Content-Type': 'application/json' 
-          },
-          timeout: 30000  // 30 second timeout
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 60000,  // Increased to 60 seconds
+          withCredentials: false
         }
       );
       
-      console.log('✅ sendAdminOTP response:', response.data);
+      console.log('✅ sendAdminOTP success:', response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ sendAdminOTP error:', error);
-      console.error('Error response:', error.response);
-      console.error('Error status:', error.status);
-      console.error('Error message:', error.message);
+      console.error('❌ sendAdminOTP failed:');
+      console.error('   Message:', error.message);
+      console.error('   Code:', error.code);
+      console.error('   Response:', error.response?.status, error.response?.data);
+      
+      if (error.code === 'ECONNABORTED') {
+        throw new Error('Request timeout. Backend is not responding.');
+      }
+      if (error.response?.status === 404) {
+        throw new Error('Endpoint not found. Check backend deployment.');
+      }
+      if (error.response?.status === 500) {
+        throw new Error('Backend server error. Check logs.');
+      }
+      
       throw error;
     }
   };
 
   // Admin login with OTP
   const adminLogin = async (email, otp) => {
-    console.log('📤 adminLogin called with:', { email, otp });
+    console.log('📤 adminLogin called');
     
     try {
       const response = await axios.post(
         `${API_BASE_URL}/auth/admin/login`,
         { email, otp },
         {
-          headers: { 
-            'Content-Type': 'application/json' 
-          },
-          timeout: 30000
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 60000,
+          withCredentials: false
         }
       );
       
-      console.log('✅ adminLogin response:', response.data);
+      console.log('✅ adminLogin success:', response.data);
       
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
@@ -75,7 +84,7 @@ export const AuthProvider = ({ children }) => {
       
       return response.data;
     } catch (error) {
-      console.error('❌ adminLogin error:', error);
+      console.error('❌ adminLogin failed:', error.message);
       throw error;
     }
   };
@@ -137,7 +146,6 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Check authentication
   const isAuthenticated = !!localStorage.getItem('token');
   const isAdmin = user?.role === 'admin';
 
