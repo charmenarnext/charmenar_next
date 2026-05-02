@@ -5,10 +5,14 @@ require('dotenv').config();
 
 const app = express();
 
-// ===== LOGGING =====
+// ===== STARTUP LOGGING =====
+console.log('');
+console.log('═══════════════════════════════════════════════════════');
 console.log('🚀 Starting Charmenar Next Backend...');
 console.log('📦 Environment:', process.env.NODE_ENV || 'development');
 console.log('🔌 Port:', process.env.PORT || 5010);
+console.log('═══════════════════════════════════════════════════════');
+console.log('');
 
 // ===== CORS Configuration =====
 const allowedOrigins = [
@@ -16,7 +20,7 @@ const allowedOrigins = [
   'https://charmenarnext.github.io/charmenar_next',
   'http://localhost:3003',
   'http://localhost:3000',
-  undefined  // Allow requests with no origin (mobile, curl, etc.)
+  undefined  // Allow requests with no origin (curl, mobile, etc.)
 ];
 
 app.use(cors({
@@ -25,7 +29,7 @@ app.use(cors({
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
     }
-    console.warn('⚠️ CORS blocked origin:', origin);
+    console.warn('⚠️  CORS blocked origin:', origin);
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
@@ -45,8 +49,9 @@ app.use((req, res, next) => {
 
 // ===== Routes =====
 console.log('📦 Loading routes...');
+console.log('');
 
-// Auth routes - MUST be loaded before other routes
+// Auth routes - MUST be loaded first
 try {
   const authRoutes = require('./routes/auth');
   app.use('/api/auth', authRoutes);
@@ -55,19 +60,26 @@ try {
   console.log('   → POST /api/auth/admin/login');
   console.log('   → POST /api/auth/register');
   console.log('   → POST /api/auth/login');
-  console.log('   → GET /api/auth/me');
+  console.log('   → GET  /api/auth/me');
 } catch (error) {
   console.error('❌ Failed to load auth routes:', error.message);
+  console.error('   Stack:', error.stack);
 }
+
+console.log('');
 
 // Events routes
 try {
   const eventsRoutes = require('./routes/events');
   app.use('/api/events', eventsRoutes);
   console.log('✅ Events routes loaded: /api/events');
+  console.log('   → POST /api/events/submit');
+  console.log('   → GET  /api/events');
 } catch (error) {
   console.error('❌ Failed to load events routes:', error.message);
 }
+
+console.log('');
 
 // ===== Health Check Endpoint =====
 app.get('/api/health', (req, res) => {
@@ -102,35 +114,36 @@ app.get('/', (req, res) => {
 
 // ===== 404 Handler (MUST be after all routes) =====
 app.use((req, res, next) => {
-  console.warn(`⚠️ 404: Route not found - ${req.method} ${req.originalUrl}`);
+  console.warn(`⚠️  404: Route not found - ${req.method} ${req.originalUrl}`);
   res.status(404).json({
     success: false,
     message: 'Endpoint not found',
     path: req.originalUrl,
     method: req.method,
     availableRoutes: [
-      'GET /',
-      'GET /api/health',
+      'GET  /',
+      'GET  /api/health',
       'POST /api/auth/admin/request-otp',
       'POST /api/auth/admin/login',
       'POST /api/auth/register',
       'POST /api/auth/login',
-      'GET /api/auth/me',
-      'POST /api/events/submit'
+      'GET  /api/auth/me',
+      'POST /api/events/submit',
+      'GET  /api/events'
     ]
   });
 });
 
 // ===== Global Error Handler (MUST be last) =====
 app.use((err, req, res, next) => {
-  console.error('🔥 Global Error Handler:', {
-    message: err.message,
-    name: err.name,
-    code: err.code,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-    path: req.path,
-    method: req.method
-  });
+  console.error('');
+  console.error('🔥 Global Error Handler:');
+  console.error('   Message:', err.message);
+  console.error('   Name:', err.name);
+  console.error('   Code:', err.code);
+  console.error('   Path:', req.path);
+  console.error('   Method:', req.method);
+  console.error('');
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
@@ -169,23 +182,31 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5010;
 const MONGO_URI = process.env.MONGODB_URI;
 
+console.log('🔌 Connecting to MongoDB...');
+
 if (!MONGO_URI) {
-  console.error('❌ MONGODB_URI environment variable is NOT set!');
+  console.error('');
+  console.error('❌ FATAL ERROR: MONGODB_URI environment variable is NOT set!');
   console.error('💡 Add MONGODB_URI in Render Dashboard → Environment');
+  console.error('');
   process.exit(1);
 }
 
-console.log('🔌 Connecting to MongoDB...');
-console.log('📊 Connection String:', MONGO_URI.replace(/:[^:]+@/, ':****@'));
+// Mask password in logs
+const maskedUri = MONGO_URI.replace(/:[^:]+@/, ':****@');
+console.log('📊 Connection String:', maskedUri);
+console.log('');
 
 mongoose.connect(MONGO_URI, {
   serverSelectionTimeoutMS: 30000,
   socketTimeoutMS: 45000,
 })
   .then(() => {
+    console.log('');
     console.log('✅ MongoDB Connected Successfully');
     console.log(`📊 Database: ${mongoose.connection.name}`);
-    console.log(` Host: ${mongoose.connection.host}`);
+    console.log(`🌐 Host: ${mongoose.connection.host}`);
+    console.log('');
     
     // Start server AFTER successful DB connection
     app.listen(PORT, '0.0.0.0', () => {
@@ -198,7 +219,6 @@ mongoose.connect(MONGO_URI, {
       console.log(`🌐 Health: http://localhost:${PORT}/api/health`);
       console.log(`🔐 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🌍 Listening on: 0.0.0.0:${PORT}`);
-      console.log('═══════════════════════════════════════════════════════');
       console.log('');
       console.log('📦 Available Endpoints:');
       console.log('   GET  /api/health');
@@ -208,15 +228,18 @@ mongoose.connect(MONGO_URI, {
       console.log('   POST /api/auth/login');
       console.log('   GET  /api/auth/me');
       console.log('   POST /api/events/submit');
+      console.log('   GET  /api/events');
       console.log('═══════════════════════════════════════════════════════');
+      console.log('');
     });
   })
   .catch(err => {
-    console.error('❌ MongoDB Connection Error:', {
-      message: err.message,
-      name: err.name,
-      code: err.code
-    });
+    console.error('');
+    console.error('❌ MongoDB Connection Error:');
+    console.error('   Message:', err.message);
+    console.error('   Name:', err.name);
+    console.error('   Code:', err.code);
+    console.error('');
     console.log('⏳ Retrying connection in 10 seconds...');
     setTimeout(() => {
       mongoose.connect(MONGO_URI).catch(() => {
@@ -247,8 +270,11 @@ process.on('SIGTERM', async () => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('💥 Unhandled Promise Rejection at:', promise);
-  console.error('💥 Reason:', reason);
+  console.error('');
+  console.error('💥 Unhandled Promise Rejection:');
+  console.error('   Promise:', promise);
+  console.error('   Reason:', reason);
+  console.error('');
   // Don't exit - let the app continue running
 });
 
