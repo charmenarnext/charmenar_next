@@ -4,9 +4,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
-const { adminAuth } = require('../middleware/auth');
 
-// OTP storage (in production, use Redis/database)
+// OTP storage (in-memory for now)
 const otpStore = new Map();
 
 // Generate 6-digit OTP
@@ -14,7 +13,9 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Send OTP to admin email
+// ===== ADMIN OTP ROUTES =====
+
+// Request OTP (Step 1)
 router.post('/admin/request-otp', async (req, res) => {
   try {
     console.log('🔐 Admin OTP Request:', req.body);
@@ -28,7 +29,7 @@ router.post('/admin/request-otp', async (req, res) => {
       });
     }
 
-    // Check if email is authorized admin
+    // Verify admin email
     const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'charmenarnext@gmail.com';
     if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
       return res.status(403).json({ 
@@ -41,14 +42,14 @@ router.post('/admin/request-otp', async (req, res) => {
     const otp = generateOTP();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
     
-    // Store OTP (in production, use database/Redis)
+    // Store OTP
     otpStore.set(email.toLowerCase(), {
       otp,
       expiresAt,
       attempts: 0
     });
 
-    // Send email via Nodemailer
+    // Send email
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -62,19 +63,18 @@ router.post('/admin/request-otp', async (req, res) => {
       to: email,
       subject: 'Admin Portal - OTP Verification',
       html: `
-        <div style="font-family: 'Poppins', sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-family: 'Playfair Display', serif;">Charmenar Next</h1>
-            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0;">Admin Portal</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+            <h1 style="color: white; margin: 0;">Charmenar Next</h1>
+            <p style="color: rgba(255,255,255,0.9);">Admin Portal</p>
           </div>
-          <div style="padding: 30px; background: #f8f9fa; border-radius: 0 0 10px 10px;">
-            <h2 style="color: #333; margin-top: 0;">Your Verification Code</h2>
-            <p style="color: #666; font-size: 16px;">Use this OTP to login to your admin dashboard:</p>
-            <div style="background: white; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+          <div style="padding: 30px; background: #f8f9fa;">
+            <h2 style="color: #333;">Your Verification Code</h2>
+            <p style="color: #666;">Use this OTP to login:</p>
+            <div style="background: white; padding: 20px; text-align: center; margin: 20px 0;">
               <span style="font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #667eea;">${otp}</span>
             </div>
-            <p style="color: #999; font-size: 14px;">This code expires in 10 minutes.</p>
-            <p style="color: #999; font-size: 12px; margin-top: 30px;">If you didn't request this, please ignore this email.</p>
+            <p style="color: #999; font-size: 14px;">Expires in 10 minutes.</p>
           </div>
         </div>
       `
@@ -91,25 +91,17 @@ router.post('/admin/request-otp', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Admin OTP Error:', error);
-    
-    // Log specific error details for debugging
-    if (error.code === 'EAUTH') {
-      console.error('Email Auth Error: Check EMAIL_USER and EMAIL_PASS');
-    }
-    if (error.code === 'ENOTFOUND') {
-      console.error('DNS Error: Check network connection');
-    }
+    console.error('❌ Admin OTP Error:', error.message);
     
     res.status(500).json({
       success: false,
-      message: 'Failed to send OTP. Please try again later.',
+      message: 'Failed to send OTP. Please try again.',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
 
-// Verify OTP and login admin
+// Verify OTP and Login (Step 2)
 router.post('/admin/login', async (req, res) => {
   try {
     console.log('🔐 Admin Login Attempt:', req.body);
@@ -133,7 +125,7 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // Check if OTP expired
+    // Check expiration
     if (Date.now() > storedOTP.expiresAt) {
       otpStore.delete(emailKey);
       return res.status(400).json({ 
@@ -142,7 +134,7 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // Check attempts limit
+    // Check attempts
     if (storedOTP.attempts >= 3) {
       otpStore.delete(emailKey);
       return res.status(400).json({ 
@@ -162,7 +154,7 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // OTP verified - generate JWT token
+    // Generate JWT token
     const adminUser = {
       id: 'admin',
       email: email,
@@ -194,7 +186,7 @@ router.post('/admin/login', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Admin Login Error:', error);
+    console.error('❌ Admin Login Error:', error.message);
     
     res.status(500).json({
       success: false,
@@ -204,7 +196,8 @@ router.post('/admin/login', async (req, res) => {
   }
 });
 
-// Regular user auth routes (keep your existing code)
+// ===== REGULAR USER AUTH ROUTES =====
+
 router.post('/register', async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
@@ -216,20 +209,17 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Check if user exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ 
         success: false, 
-        message: 'User already exists with this email' 
+        message: 'User already exists' 
       });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
     user = new User({
       name,
       email,
@@ -239,7 +229,6 @@ router.post('/register', async (req, res) => {
 
     await user.save();
 
-    // Generate token
     const token = jwt.sign(
       { userId: user._id, email: user.email },
       process.env.JWT_SECRET,
@@ -259,7 +248,7 @@ router.post('/register', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Registration error:', error.message);
     res.status(500).json({ 
       success: false, 
       message: 'Registration failed' 
@@ -278,7 +267,6 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ 
@@ -287,7 +275,6 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ 
@@ -296,7 +283,6 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Generate token
     const token = jwt.sign(
       { userId: user._id, email: user.email },
       process.env.JWT_SECRET,
@@ -316,7 +302,7 @@ router.post('/login', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Login error:', error.message);
     res.status(500).json({ 
       success: false, 
       message: 'Login failed' 
@@ -324,7 +310,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Get current user
 router.get('/me', async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -342,7 +327,7 @@ router.get('/me', async (req, res) => {
 
     res.json({ success: true, user });
   } catch (error) {
-    console.error('Get user error:', error);
+    console.error('Get user error:', error.message);
     res.status(401).json({ success: false, message: 'Invalid token' });
   }
 });

@@ -68,7 +68,10 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
   const sendAdminOTP = async (email) => {
-    const res = await axios.post(`${API_BASE_URL}/auth/admin/send-otp`, { email });
+    const res = await axios.post(
+      `${API_BASE_URL}/auth/admin/request-otp`,  // ← Check this line
+      { email }
+    );
     return res.data;
   };
 
