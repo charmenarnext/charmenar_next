@@ -2,21 +2,21 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const User = require('../models/User');
 
-// In-memory OTP store
+// In-memory OTP store (for production, use Redis/database)
 const otpStore = new Map();
 
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-// ===== CRITICAL: Log all routes being registered =====
 console.log('📦 [AUTH ROUTES] Registering routes...');
 
 // ===== ADMIN ROUTES =====
 
 // POST /api/auth/admin/request-otp
 router.post('/admin/request-otp', async (req, res) => {
+  console.log('');
+  console.log('═══════════════════════════════════════════════════════');
   console.log('🔐 [OTP REQUEST] Received:', req.body);
   console.log('📍 [OTP REQUEST] From IP:', req.ip);
   
@@ -47,45 +47,32 @@ router.post('/admin/request-otp', async (req, res) => {
     });
 
     console.log('✅ [OTP REQUEST] Generated OTP for:', email);
+    console.log('🔢 [OTP REQUEST] OTP CODE:', otp);
+    console.log('⏰ [OTP REQUEST] Expires in 10 minutes');
+    console.log('⚠️  [OTP REQUEST] Email sending DISABLED - OTP shown above');
+    console.log('═══════════════════════════════════════════════════════');
+    console.log('');
 
-    // Send email
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-
-    await transporter.sendMail({
-      from: `"Charmenar Next" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: 'Admin Portal - OTP Verification',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #667eea;">Charmenar Next Admin Portal</h2>
-          <p>Your OTP is: <strong style="font-size: 24px; letter-spacing: 5px; color: #764ba2;">${otp}</strong></p>
-          <p>This code expires in 10 minutes.</p>
-          <p style="color: #999; font-size: 12px;">If you didn't request this, please ignore this email.</p>
-        </div>
-      `
-    });
-
-    console.log('✅ [OTP REQUEST] Email sent to:', email);
-    
+    // ✅ Send response immediately WITHOUT email
     res.json({
       success: true,
-      message: 'OTP sent successfully to your email',
-      email: email
+      message: 'OTP generated successfully. Check Render logs for the code.',
+      email: email,
+      // ⚠️ For development/testing - shows OTP in response
+      // Remove this in production!
+      testOTP: otp,
+      note: 'Email sending is disabled. OTP is shown in Render logs and this response.'
     });
 
   } catch (error) {
+    console.error('');
     console.error('❌ [OTP REQUEST] Error:', error.message);
     console.error('❌ [OTP REQUEST] Stack:', error.stack);
+    console.error('');
     
     res.status(500).json({
       success: false,
-      message: 'Failed to send OTP. Please try again.',
+      message: 'Failed to generate OTP. Please try again.',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -93,6 +80,7 @@ router.post('/admin/request-otp', async (req, res) => {
 
 // POST /api/auth/admin/login
 router.post('/admin/login', async (req, res) => {
+  console.log('');
   console.log('🔐 [ADMIN LOGIN] Received:', req.body);
   
   try {
@@ -108,16 +96,19 @@ router.post('/admin/login', async (req, res) => {
       return res.status(400).json({ success: false, message: 'OTP expired or not found. Please request a new one.' });
     }
 
+    // Check expiration
     if (Date.now() > storedOTP.expiresAt) {
       otpStore.delete(email.toLowerCase());
       return res.status(400).json({ success: false, message: 'OTP has expired. Please request a new one.' });
     }
 
+    // Check attempts
     if (storedOTP.attempts >= 3) {
       otpStore.delete(email.toLowerCase());
       return res.status(400).json({ success: false, message: 'Too many attempts. Please request a new OTP.' });
     }
 
+    // Verify OTP
     if (otp !== storedOTP.otp) {
       storedOTP.attempts += 1;
       otpStore.set(email.toLowerCase(), storedOTP);
@@ -134,9 +125,11 @@ router.post('/admin/login', async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    // Clear used OTP
     otpStore.delete(email.toLowerCase());
 
     console.log('✅ [ADMIN LOGIN] Success for:', email);
+    console.log('');
 
     res.json({
       success: true,
@@ -152,6 +145,7 @@ router.post('/admin/login', async (req, res) => {
 
   } catch (error) {
     console.error('❌ [ADMIN LOGIN] Error:', error.message);
+    console.error('');
     res.status(500).json({ success: false, message: 'Login failed' });
   }
 });
