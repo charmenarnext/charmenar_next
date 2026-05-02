@@ -1,104 +1,138 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import config from '../config';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
-// ✅ API Base URL using your PORT 5010 and FRONTEND_URL 3003
-// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5010/api';
-const API_BASE_URL = config.API_URL;
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  return context;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Set axios default base URL
-    axios.defaults.baseURL = API_BASE_URL;
-    axios.defaults.headers.common['Content-Type'] = 'application/json';
-    checkAuth();
-  }, []);
+  // API base URL from config
+  const API_BASE_URL = config.API_URL;
 
-  const checkAuth = async () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        const res = await axios.get('/auth/me');
-        setUser(res.data.user);
-      } catch (error) {
-        localStorage.removeItem('token');
-        delete axios.defaults.headers.common['Authorization'];
+  // Send OTP to admin email
+  const sendAdminOTP = async (email) => {
+    console.log('📤 Sending OTP request to:', `${API_BASE_URL}/auth/admin/request-otp`);
+    
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/admin/request-otp`,
+      { email },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true
       }
-    }
-    setLoading(false);
+    );
+    return response.data;
   };
 
-  const login = async (email, password) => {
-    const res = await axios.post('/auth/login', { email, password });
-    localStorage.setItem('token', res.data.token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
-    setUser(res.data.user);
-    return res.data;
-  };
-
-  const register = async (userData) => {
-    const res = await axios.post('/auth/register', userData);
-    localStorage.setItem('token', res.data.token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
-    setUser(res.data.user);
-    return res.data;
-  };
-
+  // Admin login with OTP
   const adminLogin = async (email, otp) => {
-    const res = await axios.post('/auth/admin/verify-otp', { email, otp });
-    localStorage.setItem('token', res.data.token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
-    setUser(res.data.user);
-    return res.data;
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/admin/login`,
+      { email, otp },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true
+      }
+    );
+    
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      setUser(response.data.user);
+    }
+    return response.data;
   };
 
-  const requestAdminOTP = async (email) => {
-    return await axios.post('/auth/admin/request-otp', { email });
+  // Regular user login
+  const login = async (email, password) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/login`,
+      { email, password },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true
+      }
+    );
+    
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      setUser(response.data.user);
+    }
+    return response.data;
   };
 
+  // Register
+  const register = async (name, email, password) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/register`,
+      { name, email, password },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true
+      }
+    );
+    
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      setUser(response.data.user);
+    }
+    return response.data;
+  };
+
+  // Logout
   const logout = () => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    localStorage.removeItem('user');
     setUser(null);
   };
-  const sendAdminOTP = async (email) => {
-    const res = await axios.post(
-      `${API_BASE_URL}/auth/admin/request-otp`,  // ← Check this line
-      { email }
-    );
-    return res.data;
-  };
 
-// // Admin login with OTP
-//   const adminLogin = async (email, otp) => {
-//     const res = await axios.post(`${API_BASE_URL}/auth/admin/login`, { email, otp });
-//     localStorage.setItem('token', res.data.token);
-//     localStorage.setItem('user', JSON.stringify(res.data.user));
-//     setUser(res.data.user);
-//     return res.data;
-//   };
+  // Check if user is authenticated
+  const isAuthenticated = !!localStorage.getItem('token');
+  const isAdmin = user?.role === 'admin';
+
+  // Load user on mount
+  useEffect(() => {
+    const loadUser = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await axios.get(`${API_BASE_URL}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setUser(response.data.user);
+        } catch (error) {
+          console.error('Failed to load user:', error);
+          logout();
+        }
+      }
+      setLoading(false);
+    };
+    loadUser();
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      login, 
-      register, 
-      adminLogin, 
-      requestAdminOTP, 
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      login,
+      register,
       logout,
-      isAuthenticated: !!user,
-      isAdmin: user?.isAdmin 
+      sendAdminOTP,
+      adminLogin,
+      isAuthenticated,
+      isAdmin
     }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => useContext(AuthContext);
