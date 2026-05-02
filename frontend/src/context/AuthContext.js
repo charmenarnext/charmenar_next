@@ -72,14 +72,14 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
-// Admin login with OTP
-  const adminLogin = async (email, otp) => {
-    const res = await axios.post(`${API_BASE_URL}/auth/admin/login`, { email, otp });
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    setUser(res.data.user);
-    return res.data;
-  };
+// // Admin login with OTP
+//   const adminLogin = async (email, otp) => {
+//     const res = await axios.post(`${API_BASE_URL}/auth/admin/login`, { email, otp });
+//     localStorage.setItem('token', res.data.token);
+//     localStorage.setItem('user', JSON.stringify(res.data.user));
+//     setUser(res.data.user);
+//     return res.data;
+//   };
 
   return (
     <AuthContext.Provider value={{ 
