@@ -21,7 +21,7 @@ import './App.css';
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename="/charmenar_next">
         <div className="App">
           {/* ScrollToTop Component - Ensures page scrolls to top on every route change */}
           <ScrollToTop />
