@@ -12,9 +12,10 @@ const Footer = () => {
           <div className="footer-section">
             <div className="footer-logo">
               <img 
-                src={`./logo.png?v=${Date.now()}`} 
+                src={`${process.env.PUBLIC_URL}/logo.png`} 
                 alt="Charmenar Next" 
-                className="navbar-logo-img"
+                className="footer-logo-img"
+                onError={(e) => { e.target.style.display = 'none'; }}
               />
               <div className="footer-logo-text">
                 <h3>Charmenar <span className="gradient-text">Next</span></h3>
@@ -25,10 +26,10 @@ const Footer = () => {
               Creating memorable experiences with premium catering and event services.
             </p>
             <div className="footer-social">
-              <a href="#" className="social-link"><FiFacebook /></a>
-              <a href="#" className="social-link"><FiTwitter /></a>
-              <a href="#" className="social-link"><FiInstagram /></a>
-              <a href="#" className="social-link"><FiLinkedin /></a>
+              <a href="https://facebook.com" className="social-link" target="_blank" rel="noopener noreferrer"><FiFacebook /></a>
+              <a href="https://twitter.com" className="social-link" target="_blank" rel="noopener noreferrer"><FiTwitter /></a>
+              <a href="https://instagram.com" className="social-link" target="_blank" rel="noopener noreferrer"><FiInstagram /></a>
+              <a href="https://linkedin.com" className="social-link" target="_blank" rel="noopener noreferrer"><FiLinkedin /></a>
             </div>
           </div>
 
@@ -56,18 +57,24 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Contact Info - UPDATED */}
           <div className="footer-section">
             <h3>Contact Us</h3>
             <ul className="contact-list">
               <li>
-                <FiPhone /> +9124470079
+                <FiPhone /> 
+                <a href="tel:+9124470079" className="contact-link">+91 24470079</a>
               </li>
               <li>
-                <FiMail /> charmenarnext@gmail.com
+                <FiMail /> 
+                <a href="mailto:charmenarnext@gmail.com" className="contact-link">charmenarnext@gmail.com</a>
               </li>
               <li>
-                <FiMapPin /> Plot No.533,K7,Vipul Garden Road,Bhubaneswar 751003
+                <FiMapPin /> 
+                <span className="contact-address">
+                  Plot No.533, K7, Vipul Garden Road,<br />
+                  Bhubaneswar 751003
+                </span>
               </li>
             </ul>
           </div>
