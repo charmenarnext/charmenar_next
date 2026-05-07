@@ -84,7 +84,7 @@ const ContactUs = () => {
                 <div className="info-text">
                   <h4>Visit Us</h4>
                   <p className="contact-address">
-                    Plot No.533, K7, Vipul Garden Road,<br />
+                    Plot No.533, K7,<br /> Vipul Garden Road,<br />
                     Bhubaneswar 751003
                   </p>
                 </div>
