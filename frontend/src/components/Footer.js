@@ -12,12 +12,9 @@ const Footer = () => {
           <div className="footer-section">
             <div className="footer-logo">
               <img 
-                src={`${process.env.PUBLIC_URL}/logo.png`} 
+                src={`./logo.png?v=${Date.now()}`} 
                 alt="Charmenar Next" 
-                className="footer-logo-img"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
+                className="navbar-logo-img"
               />
               <div className="footer-logo-text">
                 <h3>Charmenar <span className="gradient-text">Next</span></h3>

@@ -30,13 +30,9 @@ const Navbar = () => {
         {/* ===== LOGO ===== */}
         <Link to="/" className="navbar-logo" onClick={() => window.scrollTo(0, 0)}>
           <img 
-            src={`${process.env.PUBLIC_URL}/logo.png`} 
+            src={`./logo.png?v=${Date.now()}`} 
             alt="Charmenar Next" 
             className="navbar-logo-img"
-            onError={(e) => {
-              // Fallback if logo doesn't exist
-              e.target.style.display = 'none';
-            }}
           />
           <span className="navbar-logo-text">
             Charmenar <span className="gradient-text">Next</span>
