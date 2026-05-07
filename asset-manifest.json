@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/charmenar_next/static/css/main.5075b4d4.css",
-    "main.js": "/charmenar_next/static/js/main.d77afc23.js",
+    "main.css": "/charmenar_next/static/css/main.66de7f92.css",
+    "main.js": "/charmenar_next/static/js/main.4f93214a.js",
     "index.html": "/charmenar_next/index.html",
-    "main.5075b4d4.css.map": "/charmenar_next/static/css/main.5075b4d4.css.map",
-    "main.d77afc23.js.map": "/charmenar_next/static/js/main.d77afc23.js.map"
+    "main.66de7f92.css.map": "/charmenar_next/static/css/main.66de7f92.css.map",
+    "main.4f93214a.js.map": "/charmenar_next/static/js/main.4f93214a.js.map"
   },
   "entrypoints": [
-    "static/css/main.5075b4d4.css",
-    "static/js/main.d77afc23.js"
+    "static/css/main.66de7f92.css",
+    "static/js/main.4f93214a.js"
   ]
 }
