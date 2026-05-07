@@ -11,7 +11,14 @@ const Footer = () => {
           {/* Logo & About */}
           <div className="footer-section">
             <div className="footer-logo">
-              <img src="/logo.png" alt="Charmenar Next" className="footer-logo-img" />
+              <img 
+                src={`${process.env.PUBLIC_URL}/logo.png`} 
+                alt="Charmenar Next" 
+                className="footer-logo-img"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
               <div className="footer-logo-text">
                 <h3>Charmenar <span className="gradient-text">Next</span></h3>
                 <p className="footer-tagline">Food • Fun • Service</p>
