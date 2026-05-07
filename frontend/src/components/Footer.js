@@ -61,13 +61,13 @@ const Footer = () => {
             <h3>Contact Us</h3>
             <ul className="contact-list">
               <li>
-                <FiPhone /> +91 XXXXX XXXXX
+                <FiPhone /> +9124470079
               </li>
               <li>
                 <FiMail /> charmenarnext@gmail.com
               </li>
               <li>
-                <FiMapPin /> Your City, Your State
+                <FiMapPin /> Plot No.533,K7,Vipul Garden Road,Bhubaneswar 751003
               </li>
             </ul>
           </div>
