@@ -60,7 +60,7 @@ const ContactUs = () => {
                 <div className="info-text">
                   <h4>Call Us</h4>
                   <p>
-                    <a href="tel:+9124470079" className="contact-link">+91 24470079</a>
+                    <a href="tel:+9124470079" className="contact-link">+9124470079</a>
                   </p>
                 </div>
               </div>
