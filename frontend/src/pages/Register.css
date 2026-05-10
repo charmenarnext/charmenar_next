@@ -86,38 +86,38 @@
   font-weight: 600;
   transition: all 0.3s ease;
   font-family: 'Poppins', sans-serif;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.95);  /* Lighter background */
   
-  /* Force text to be bright white */
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important; /* Fixes Chrome/Safari */
-  caret-color: #FFFFFF; /* Makes blinking cursor visible */
+  /* ✅ CHANGE TEXT TO BLACK */
+  color: #0f1c26 !important;  /* Dark navy/black color */
+  -webkit-text-fill-color: #0f1c26 !important;
+  caret-color: #0f1c26;  /* Dark cursor */
 }
 
 .input-premium::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(15, 28, 38, 0.5);  /* Dark placeholder */
   font-weight: 500;
 }
 
 .input-premium:focus {
   outline: none;
   border-color: #D4AF37;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 1);
   box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
 }
 
 .input-premium:disabled {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.5);
   cursor: not-allowed;
-  color: rgba(255, 255, 255, 0.6) !important;
+  color: rgba(15, 28, 38, 0.5) !important;
 }
 
-/* ✅ FIX FOR BROWSER AUTOFILL (prevents black background/text when browser auto-fills) */
+/* ✅ FIX FOR BROWSER AUTOFILL */
 .input-premium:-webkit-autofill,
 .input-premium:-webkit-autofill:hover,
 .input-premium:-webkit-autofill:focus {
-  -webkit-text-fill-color: #FFFFFF !important;
-  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.15) inset !important;
+  -webkit-text-fill-color: #0f1c26 !important;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.95) inset !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
