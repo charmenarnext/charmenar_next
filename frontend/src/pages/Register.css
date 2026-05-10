@@ -60,10 +60,10 @@
   gap: 8px;
 }
 
-/* ✅ FORCED: Labels are now GOLD */
+/* ✅ GOLD LABELS */
 .form-group label {
   font-weight: 700;
-  color: #D4AF37 !important; /* !important forces this color */
+  color: #D4AF37 !important;
   font-size: 15px;
   display: flex;
   align-items: center;
@@ -71,12 +71,13 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* ✅ FORCED: Asterisk is RED */
+/* ✅ RED ASTERISK */
 .required {
-  color: #FF0000 !important; /* !important forces this color */
+  color: #FF0000 !important;
   font-weight: 800;
 }
 
+/* ✅ COMPLETE INPUT FIX - Text will now be visible while typing */
 .input-premium {
   padding: 16px 20px;
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -86,11 +87,15 @@
   transition: all 0.3s ease;
   font-family: 'Poppins', sans-serif;
   background: rgba(255, 255, 255, 0.15);
-  color: white;
+  
+  /* Force text to be bright white */
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important; /* Fixes Chrome/Safari */
+  caret-color: #FFFFFF; /* Makes blinking cursor visible */
 }
 
 .input-premium::placeholder {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 500;
 }
 
@@ -104,7 +109,16 @@
 .input-premium:disabled {
   background: rgba(255, 255, 255, 0.08);
   cursor: not-allowed;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* ✅ FIX FOR BROWSER AUTOFILL (prevents black background/text when browser auto-fills) */
+.input-premium:-webkit-autofill,
+.input-premium:-webkit-autofill:hover,
+.input-premium:-webkit-autofill:focus {
+  -webkit-text-fill-color: #FFFFFF !important;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.15) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .password-input-wrapper {
