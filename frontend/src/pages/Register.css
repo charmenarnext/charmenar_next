@@ -60,10 +60,10 @@
   gap: 8px;
 }
 
-/* ✅ UPDATED: Labels are now GOLD to match "Account" text */
+/* ✅ FORCED: Labels are now GOLD */
 .form-group label {
   font-weight: 700;
-  color: #D4AF37; /* Gold Color */
+  color: #D4AF37 !important; /* !important forces this color */
   font-size: 15px;
   display: flex;
   align-items: center;
@@ -71,9 +71,9 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* ✅ UPDATED: Asterisk is RED */
+/* ✅ FORCED: Asterisk is RED */
 .required {
-  color: #FF0000; /* Red Color */
+  color: #FF0000 !important; /* !important forces this color */
   font-weight: 800;
 }
 
