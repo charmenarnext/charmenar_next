@@ -43,7 +43,7 @@
 }
 
 .register-header p {
-  color: rgba(255, 255, 255, 0.9);
+  color: white;
   font-size: 15px;
   font-weight: 500;
 }
@@ -71,7 +71,7 @@
 }
 
 .required {
-  color: #F4D03F;
+  color: #FF0000;
   font-weight: 800;
 }
 
@@ -124,6 +124,7 @@
   cursor: pointer;
   font-size: 18px;
   opacity: 0.9;
+  color: white;
   transition: opacity 0.3s ease;
 }
 
@@ -132,7 +133,7 @@
 }
 
 .form-hint {
-  color: rgba(255, 255, 255, 0.8);
+  color: white;
   font-size: 13px;
   margin-top: -5px;
   font-weight: 500;
@@ -186,7 +187,7 @@
 .register-footer {
   text-align: center;
   margin-top: 20px;
-  color: rgba(255, 255, 255, 0.9);
+  color: white;
   font-size: 14px;
   font-weight: 600;
 }
