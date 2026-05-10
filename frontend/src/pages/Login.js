@@ -1,58 +1,135 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import './Auth.css';
+import { FiMail, FiLock, FiLogIn } from 'react-icons/fi';
+import './Login.css';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate inputs
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
+
+    if (!email.includes('@')) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    setLoading(true);
+    
     try {
-      await login(formData.email, formData.password);
-      toast.success('Login successful!');
-      navigate('/');
+      console.log('🔐 Attempting login...');
+      
+      // Call login function
+      const response = await login(email, password);
+      
+      console.log('✅ Login successful:', response);
+      
+      // Show success toast
+      toast.success(`Welcome back, ${response.user.name}!`);
+      
+      // Wait a moment for toast to show
+      setTimeout(() => {
+        // Redirect to home page
+        navigate('/');
+        // Force reload to ensure state updates
+        window.location.reload();
+      }, 1000);
+      
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      console.error('❌ Login failed:', error);
+      toast.error(error.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <h2>Welcome Back</h2>
-        <p>Login to your Charmenar Next account</p>
-        
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label>Email Address</label>
-            <input 
-              type="email" 
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              required 
-            />
+    <div className="login-page">
+      <div className="login-container">
+        <div className="login-card">
+          <div className="login-header">
+            <h1>Welcome <span className="gradient-text">Back</span></h1>
+            <p>Login to your account to continue</p>
           </div>
 
-          <div className="form-group">
-            <label>Password</label>
-            <input 
-              type="password" 
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              required 
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <label htmlFor="email">
+                <FiMail /> Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+                disabled={loading}
+                className="input-premium"
+              />
+            </div>
 
-          <button type="submit" className="premium-btn">Login</button>
-        </form>
+            <div className="form-group">
+              <label htmlFor="password">
+                <FiLock /> Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                disabled={loading}
+                className="input-premium"
+              />
+            </div>
 
-        <p className="auth-switch">
-          Don't have an account? <Link to="/register">Register</Link>
-        </p>
+            <div className="form-options">
+              <label className="remember-me">
+                <input type="checkbox" />
+                <span>Remember me</span>
+              </label>
+              <Link to="/forgot-password" className="forgot-password">
+                Forgot Password?
+              </Link>
+            </div>
+
+            <button 
+              type="submit" 
+              className="submit-btn"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="spinner"></span>
+                  Logging in...
+                </>
+              ) : (
+                <>
+                  <FiLogIn /> Login
+                </>
+              )}
+            </button>
+
+            <div className="login-footer">
+              <p>Don't have an account? <Link to="/register">Register here</Link></p>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

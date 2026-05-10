@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import config from '../config';
+import { toast } from 'react-toastify';
 
 const AuthContext = createContext();
 
@@ -18,79 +19,32 @@ export const AuthProvider = ({ children }) => {
 
   const API_BASE_URL = config.API_URL;
 
-  console.log('🔧 AuthContext - API_BASE_URL:', API_BASE_URL);
-
-  // Send OTP to admin email
-  const sendAdminOTP = async (email) => {
-    console.log('📤 sendAdminOTP called');
-    console.log('   Email:', email);
-    console.log('   URL:', `${API_BASE_URL}/auth/admin/request-otp`);
-    
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/auth/admin/request-otp`,
-        { email },
-        {
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 60000,  // Increased to 60 seconds
-          withCredentials: false
+  // Check if user is already logged in on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      
+      if (token && storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+          console.log('✅ User already logged in:', JSON.parse(storedUser));
+        } catch (error) {
+          console.error('❌ Error parsing stored user:', error);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
         }
-      );
-      
-      console.log('✅ sendAdminOTP success:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ sendAdminOTP failed:');
-      console.error('   Message:', error.message);
-      console.error('   Code:', error.code);
-      console.error('   Response:', error.response?.status, error.response?.data);
-      
-      if (error.code === 'ECONNABORTED') {
-        throw new Error('Request timeout. Backend is not responding.');
       }
-      if (error.response?.status === 404) {
-        throw new Error('Endpoint not found. Check backend deployment.');
-      }
-      if (error.response?.status === 500) {
-        throw new Error('Backend server error. Check logs.');
-      }
-      
-      throw error;
-    }
-  };
-
-  // Admin login with OTP
-  const adminLogin = async (email, otp) => {
-    console.log('📤 adminLogin called');
+      setLoading(false);
+    };
     
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/auth/admin/login`,
-        { email, otp },
-        {
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 60000,
-          withCredentials: false
-        }
-      );
-      
-      console.log('✅ adminLogin success:', response.data);
-      
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        setUser(response.data.user);
-      }
-      
-      return response.data;
-    } catch (error) {
-      console.error('❌ adminLogin failed:', error.message);
-      throw error;
-    }
-  };
+    checkAuth();
+  }, []);
 
   // Regular user login
   const login = async (email, password) => {
+    console.log('🔐 Login attempt:', { email });
+    
     try {
       const response = await axios.post(
         `${API_BASE_URL}/auth/login`,
@@ -101,74 +55,84 @@ export const AuthProvider = ({ children }) => {
         }
       );
       
-      if (response.data.token) {
+      console.log('✅ Login response:', response.data);
+      
+      if (response.data.token && response.data.user) {
+        // Save to localStorage
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // Update state
         setUser(response.data.user);
+        
+        console.log('✅ Login successful, user:', response.data.user);
+        
+        return response.data;
+      } else {
+        throw new Error('Invalid response from server');
       }
       
-      return response.data;
     } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+      console.error('❌ Login error:', error);
+      console.error('Error response:', error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Login failed. Please check your credentials.';
+      
+      throw new Error(errorMessage);
     }
   };
 
   // Register
-  const register = async (name, email, password) => {
+  const register = async (name, email, password, phone) => {
+    console.log('📝 Register attempt:', { email });
+    
     try {
       const response = await axios.post(
         `${API_BASE_URL}/auth/register`,
-        { name, email, password },
+        { name, email, password, phone },
         {
           headers: { 'Content-Type': 'application/json' },
           timeout: 30000
         }
       );
       
-      if (response.data.token) {
+      console.log('✅ Register response:', response.data);
+      
+      if (response.data.token && response.data.user) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         setUser(response.data.user);
+        
+        return response.data;
+      } else {
+        throw new Error('Invalid response from server');
       }
       
-      return response.data;
     } catch (error) {
-      console.error('Register error:', error);
-      throw error;
+      console.error('❌ Register error:', error);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Registration failed. Please try again.';
+      
+      throw new Error(errorMessage);
     }
   };
 
   // Logout
   const logout = () => {
+    console.log('🚪 Logging out...');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    toast.info('Logged out successfully');
   };
 
+  // Check if authenticated
   const isAuthenticated = !!localStorage.getItem('token');
   const isAdmin = user?.role === 'admin';
-
-  // Load user on mount
-  useEffect(() => {
-    const loadUser = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await axios.get(`${API_BASE_URL}/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-            timeout: 10000
-          });
-          setUser(response.data.user);
-        } catch (error) {
-          console.error('Failed to load user:', error);
-          logout();
-        }
-      }
-      setLoading(false);
-    };
-    loadUser();
-  }, [API_BASE_URL]);
 
   return (
     <AuthContext.Provider value={{
@@ -177,10 +141,9 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       logout,
-      sendAdminOTP,
-      adminLogin,
       isAuthenticated,
-      isAdmin
+      isAdmin,
+      setUser  // Export setUser for manual updates if needed
     }}>
       {children}
     </AuthContext.Provider>
