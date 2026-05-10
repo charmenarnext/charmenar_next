@@ -32,6 +32,7 @@
   font-size: 32px;
   color: white;
   margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .gradient-text {
@@ -42,15 +43,16 @@
 }
 
 .login-header p {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 15px;
+  font-weight: 500;
 }
 
 .login-type-toggle {
   display: flex;
   gap: 10px;
   margin-bottom: 25px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   padding: 5px;
   border-radius: 12px;
 }
@@ -65,9 +67,9 @@
   background: transparent;
   border: none;
   border-radius: 10px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Poppins', sans-serif;
@@ -75,13 +77,13 @@
 
 .toggle-btn:hover {
   color: white;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .toggle-btn.active {
   background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
   color: #0f1c26;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .login-form {
@@ -97,9 +99,9 @@
 }
 
 .form-group label {
-  font-weight: 600;
+  font-weight: 700;
   color: white;
-  font-size: 14px;
+  font-size: 15px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -108,36 +110,37 @@
 
 .required {
   color: #F4D03F;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .input-premium {
   padding: 16px 20px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 14px;
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 600;
   transition: all 0.3s ease;
   font-family: 'Poppins', sans-serif;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
-  font-weight: 500;
 }
 
 .input-premium::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
 }
 
 .input-premium:focus {
   outline: none;
   border-color: #D4AF37;
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
 }
 
 .input-premium:disabled {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
   cursor: not-allowed;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .password-input-wrapper {
@@ -158,7 +161,7 @@
   border: none;
   cursor: pointer;
   font-size: 18px;
-  opacity: 0.8;
+  opacity: 0.9;
   transition: opacity 0.3s ease;
 }
 
@@ -175,7 +178,7 @@
 .forgot-password {
   color: #D4AF37;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   transition: color 0.3s ease;
 }
 
@@ -190,7 +193,7 @@
   padding: 18px;
   border-radius: 14px;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -231,14 +234,15 @@
 .login-footer {
   text-align: center;
   margin-top: 15px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
+  font-weight: 600;
 }
 
 .login-footer a {
   color: #D4AF37;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
   transition: color 0.3s ease;
 }
 
