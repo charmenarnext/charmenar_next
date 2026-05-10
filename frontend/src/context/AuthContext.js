@@ -41,57 +41,14 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Regular user login
-  const login = async (email, password) => {
-    console.log('🔐 Login attempt:', { email });
-    
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/auth/login`,
-        { email, password },
-        {
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 30000
-        }
-      );
-      
-      console.log('✅ Login response:', response.data);
-      
-      if (response.data.token && response.data.user) {
-        // Save to localStorage
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        
-        // Update state
-        setUser(response.data.user);
-        
-        console.log('✅ Login successful, user:', response.data.user);
-        
-        return response.data;
-      } else {
-        throw new Error('Invalid response from server');
-      }
-      
-    } catch (error) {
-      console.error('❌ Login error:', error);
-      console.error('Error response:', error.response?.data);
-      
-      const errorMessage = error.response?.data?.message || 
-                          error.message || 
-                          'Login failed. Please check your credentials.';
-      
-      throw new Error(errorMessage);
-    }
-  };
-
-  // Register
-  const register = async (name, email, password, phone) => {
-    console.log('📝 Register attempt:', { email });
+  // Register (Name, Email, Phone, Password)
+  const register = async (name, email, phone, password) => {
+    console.log('📝 Register attempt:', { name, email, phone });
     
     try {
       const response = await axios.post(
         `${API_BASE_URL}/auth/register`,
-        { name, email, password, phone },
+        { name, email, phone, password },
         {
           headers: { 'Content-Type': 'application/json' },
           timeout: 30000
@@ -121,6 +78,43 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Login (Phone + Password)
+  const login = async (phone, password) => {
+    console.log('🔐 Login attempt:', { phone });
+    
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/login`,
+        { phone, password },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 30000
+        }
+      );
+      
+      console.log('✅ Login response:', response.data);
+      
+      if (response.data.token && response.data.user) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        setUser(response.data.user);
+        
+        return response.data;
+      } else {
+        throw new Error('Invalid response from server');
+      }
+      
+    } catch (error) {
+      console.error('❌ Login error:', error);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Login failed. Please check your credentials.';
+      
+      throw new Error(errorMessage);
+    }
+  };
+
   // Logout
   const logout = () => {
     console.log('🚪 Logging out...');
@@ -138,12 +132,12 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{
       user,
       loading,
-      login,
       register,
+      login,
       logout,
       isAuthenticated,
       isAdmin,
-      setUser  // Export setUser for manual updates if needed
+      setUser
     }}>
       {children}
     </AuthContext.Provider>
