@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const cateringRoutes = require('./routes/catering');
+const eventsRoutes = require('./routes/events');
 require('dotenv').config();
 
 const app = express();
@@ -67,6 +69,11 @@ try {
 
 console.log('');
 
+app.use('/api/catering', cateringRoutes);
+app.use('/api/events', eventsRoutes);
+
+console.log('✅ Catering routes registered');
+console.log('✅ Events routes registered');
 // Events routes
 try {
   const eventsRoutes = require('./routes/events');

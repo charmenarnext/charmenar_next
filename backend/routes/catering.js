@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 
-// POST /api/events/submit
+// POST /api/catering/submit
 router.post('/submit', async (req, res) => {
   try {
     const { 
@@ -11,14 +11,12 @@ router.post('/submit', async (req, res) => {
       phone, 
       eventType, 
       eventDate, 
-      venue, 
       guestCount, 
-      budget,
       message,
       services 
     } = req.body;
 
-    console.log('🎉 [EVENTS] New booking request:', { name, email, phone });
+    console.log('🍽️ [CATERING] New inquiry received:', { name, email, phone });
 
     // Validate required fields
     if (!name || !email || !phone || !eventType || !eventDate || !guestCount) {
@@ -41,11 +39,11 @@ router.post('/submit', async (req, res) => {
     await transporter.sendMail({
       from: `"Charmenar Next" <${process.env.EMAIL_USER}>`,
       to: process.env.ADMIN_EMAIL || 'charmenarnext@gmail.com',
-      subject: `🎉 New Event Booking - ${eventType}`,
+      subject: `🍽️ New Catering Inquiry - ${eventType}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4;">
           <div style="background: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #764ba2;">New Event Booking Request</h2>
+            <h2 style="color: #667eea;">New Catering Inquiry</h2>
             
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
               <tr style="background: #f8f9fa;">
@@ -69,16 +67,8 @@ router.post('/submit', async (req, res) => {
                 <td style="padding: 12px; border: 1px solid #dee2e6;">${eventDate}</td>
               </tr>
               <tr>
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Venue</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${venue || 'Not specified'}</td>
-              </tr>
-              <tr style="background: #f8f9fa;">
                 <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Guest Count</td>
                 <td style="padding: 12px; border: 1px solid #dee2e6;">${guestCount}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Budget</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${budget || 'Not specified'}</td>
               </tr>
               <tr style="background: #f8f9fa;">
                 <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Services</td>
@@ -96,58 +86,55 @@ router.post('/submit', async (req, res) => {
       `
     });
 
-    console.log('✅ [EVENTS] Booking email sent to admin');
+    console.log('✅ [CATERING] Inquiry email sent to admin');
 
     res.json({
       success: true,
-      message: 'Thank you! Your event booking request has been submitted. Our team will contact you within 24 hours.'
+      message: 'Thank you! Your catering inquiry has been submitted. We will contact you within 24 hours.'
     });
 
   } catch (error) {
-    console.error('❌ [EVENTS] Error:', error.message);
+    console.error('❌ [CATERING] Error:', error.message);
     res.status(500).json({ 
       success: false, 
-      message: 'Failed to submit booking. Please try again.',
+      message: 'Failed to submit inquiry. Please try again.',
       error: error.message 
     });
   }
 });
 
-// GET /api/events/list
-router.get('/list', async (req, res) => {
+// GET /api/catering/packages
+router.get('/packages', async (req, res) => {
   try {
-    // Sample events - replace with database query
-    const events = [
+    // Sample packages - replace with database query
+    const packages = [
       {
         id: 1,
-        name: 'Grand Wedding Package',
-        category: 'Wedding',
-        price: 50000,
-        description: 'Complete wedding planning and execution',
-        image: 'wedding.jpg'
+        name: 'Basic Package',
+        price: 500,
+        description: 'Perfect for small gatherings',
+        items: ['Starter', 'Main Course', 'Dessert']
       },
       {
         id: 2,
-        name: 'Corporate Event',
-        category: 'Corporate',
-        price: 30000,
-        description: 'Professional corporate event management',
-        image: 'corporate.jpg'
+        name: 'Premium Package',
+        price: 1000,
+        description: 'Ideal for medium events',
+        items: ['Starter', 'Main Course', 'Dessert', 'Beverages']
       },
       {
         id: 3,
-        name: 'Birthday Celebration',
-        category: 'Birthday',
-        price: 15000,
-        description: 'Memorable birthday party planning',
-        image: 'birthday.jpg'
+        name: 'Royal Package',
+        price: 2000,
+        description: 'For grand celebrations',
+        items: ['Starter', 'Main Course', 'Dessert', 'Beverages', 'Special Dishes']
       }
     ];
 
-    res.json({ success: true, events });
+    res.json({ success: true, packages });
   } catch (error) {
-    console.error('❌ [EVENTS] List error:', error.message);
-    res.status(500).json({ success: false, message: 'Failed to fetch events' });
+    console.error('❌ [CATERING] Packages error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to fetch packages' });
   }
 });
 

@@ -1,380 +1,322 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import axios from 'axios';
-import { FiCoffee, FiAward, FiHeart, FiStar, FiCheck, FiUsers, FiClock, FiMapPin, FiShield, FiTrendingUp } from 'react-icons/fi';
+import { FiCalendar, FiUsers, FiMail, FiPhone, FiUser, FiMessageSquare, FiSend } from 'react-icons/fi';
 import './Catering.css';
 
 const Catering = () => {
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    cateringType: 'Wedding',
-    eventName: '',
+    name: '',
+    email: '',
+    phone: '',
+    eventType: '',
     eventDate: '',
-    numberOfGuests: '',
-    menuType: 'Vegetarian',
-    specialDietary: '',
-    venue: '',
-    budget: '',
-    additionalNotes: ''
+    guestCount: '',
+    services: '',
+    message: ''
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!isAuthenticated) {
-      toast.info('Please login to submit your catering request');
-      navigate('/login');
-      return;
-    }
+    setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.post('${config.API_URL}/events/submit', {
-        eventType: 'Catering',
-        eventName: formData.eventName,
-        eventDate: formData.eventDate,
-        eventTime: '12:00',
-        venue: formData.venue,
-        numberOfGuests: parseInt(formData.numberOfGuests),
-        menuPreferences: `${formData.menuType} - ${formData.specialDietary}`,
-        specialRequests: formData.additionalNotes,
-        budget: formData.budget
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch('https://charmenar-next-api.onrender.com/api/catering/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
-      
-      toast.success('Catering request submitted successfully! We will contact you soon.');
-      setFormData({
-        cateringType: 'Wedding',
-        eventName: '',
-        eventDate: '',
-        numberOfGuests: '',
-        menuType: 'Vegetarian',
-        specialDietary: '',
-        venue: '',
-        budget: '',
-        additionalNotes: ''
-      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data.message);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          eventType: '',
+          eventDate: '',
+          guestCount: '',
+          services: '',
+          message: ''
+        });
+      } else {
+        toast.error(data.message || 'Failed to submit inquiry');
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to submit request');
+      console.error('Catering submit error:', error);
+      toast.error('Failed to submit. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="catering-page">
-      {/* Hero Section */}
-      <section className="catering-hero">
-        <div className="hero-overlay"></div>
-        <div className="hero-content">
-          <h1>Premium Catering Services</h1>
-          <p>Exquisite culinary experiences tailored to your taste</p>
+      {/* Page Header */}
+      <section className="page-header">
+        <div className="container">
+          <h1>
+            Our <span className="gradient-text">Catering</span>
+          </h1>
+          <p>Delicious food crafted with passion for your special occasions</p>
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className="catering-services">
+      {/* Menu Section */}
+      <section className="menu-section">
         <div className="container">
-          <div className="section-header">
-            <h2>Our Catering Specialties</h2>
-            <p>From intimate gatherings to grand celebrations</p>
-          </div>
-
-          <div className="services-grid">
-            <div className="service-card">
-              <div className="service-icon"><FiCoffee /></div>
-              <h3>Wedding Catering</h3>
-              <p>Make your special day unforgettable with our gourmet wedding menus</p>
-            </div>
-            <div className="service-card">
-              <div className="service-icon"><FiUsers /></div>
-              <h3>Corporate Events</h3>
-              <p>Impress clients and team with professional catering services</p>
-            </div>
-            <div className="service-card">
-              <div className="service-icon"><FiAward /></div>
-              <h3>Private Parties</h3>
-              <p>Celebrate milestones with customized menu options</p>
-            </div>
-            <div className="service-card">
-              <div className="service-icon"><FiHeart /></div>
-              <h3>Special Occasions</h3>
-              <p>Birthdays, anniversaries, and all life's celebrations</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ✅ REDESIGNED: Why Choose Us Section */}
-      <section className="why-choose-section">
-        <div className="container">
-          <div className="section-header">
-            <h2>Why Choose Charmenar Catering</h2>
-            <p>Experience the difference that makes us the preferred choice</p>
-          </div>
-
-          <div className="why-choose-grid">
-            <div className="why-card">
-              <div className="why-card-icon">
-                <FiCheck />
-              </div>
-              <h3>Premium Ingredients</h3>
-              <p>Only the freshest, locally-sourced ingredients from trusted suppliers</p>
-              <ul className="why-list">
-                <li>✓ Organic produce</li>
-                <li>✓ Farm-fresh dairy</li>
-                <li>✓ Premium meats & seafood</li>
-              </ul>
-            </div>
-
-            <div className="why-card featured">
-              <div className="featured-badge">Most Popular</div>
-              <div className="why-card-icon">
-                <FiStar />
-              </div>
-              <h3>Expert Chefs</h3>
-              <p>World-class culinary professionals with years of experience</p>
-              <ul className="why-list">
-                <li>✓ Certified master chefs</li>
-                <li>✓ 10+ years experience</li>
-                <li>✓ International cuisine expertise</li>
-              </ul>
-            </div>
-
-            <div className="why-card">
-              <div className="why-card-icon">
-                <FiClock />
-              </div>
-              <h3>On-Time Service</h3>
-              <p>Punctual delivery and setup guaranteed for your peace of mind</p>
-              <ul className="why-list">
-                <li>✓ Early setup available</li>
-                <li>✓ Timely food service</li>
-                <li>✓ Flexible scheduling</li>
-              </ul>
-            </div>
-
-            <div className="why-card">
-              <div className="why-card-icon">
-                <FiMapPin />
-              </div>
-              <h3>Flexible Venues</h3>
-              <p>We cater at your location or recommend our partner venues</p>
-              <ul className="why-list">
-                <li>✓ Home catering</li>
-                <li>✓ Event halls</li>
-                <li>✓ Outdoor venues</li>
-              </ul>
-            </div>
-
-            <div className="why-card">
-              <div className="why-card-icon">
-                <FiShield />
-              </div>
-              <h3>Hygiene Certified</h3>
-              <p>Food safety and hygiene standards you can trust completely</p>
-              <ul className="why-list">
-                <li>✓ FSSAI certified</li>
-                <li>✓ Regular health checks</li>
-                <li>✓ Sanitized equipment</li>
-              </ul>
-            </div>
-
-            <div className="why-card">
-              <div className="why-card-icon">
-                <FiTrendingUp />
-              </div>
-              <h3>Best Value</h3>
-              <p>Premium quality catering at competitive and transparent pricing</p>
-              <ul className="why-list">
-                <li>✓ No hidden charges</li>
-                <li>✓ Customizable packages</li>
-                <li>✓ Budget-friendly options</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Menu Preview */}
-      <section className="menu-preview">
-        <div className="container">
-          <div className="section-header">
-            <h2>Menu Options</h2>
-            <p>Choose from our diverse culinary offerings</p>
-          </div>
-
+          <h2>Our <span className="gradient-text">Menu Packages</span></h2>
+          
           <div className="menu-grid">
             <div className="menu-item">
-              <div className="menu-emoji">🥗</div>
-              <h3>Vegetarian Delights</h3>
-              <p>Fresh, organic vegetarian dishes crafted with seasonal ingredients</p>
+              <img 
+                src="https://images.unsplash.com/photo-1555244162-803834f70033?w=600" 
+                alt="Basic Package" 
+                className="menu-item-image"
+              />
+              <div className="menu-item-content">
+                <h3 className="menu-item-title">Basic Package</h3>
+                <p className="menu-item-description">
+                  Perfect for small gatherings and intimate celebrations
+                </p>
+                <ul className="menu-items-list">
+                  <li>✓ Starter (2 varieties)</li>
+                  <li>✓ Main Course (4 varieties)</li>
+                  <li>✓ Dessert (2 varieties)</li>
+                  <li>✓ Basic Setup</li>
+                </ul>
+                <p className="menu-item-price">₹500 <span>per person</span></p>
+              </div>
             </div>
-            <div className="menu-item">
-              <div className="menu-emoji">🍖</div>
-              <h3>Premium Non-Vegetarian</h3>
-              <p>Exquisite meat and seafood selections prepared to perfection</p>
+
+            <div className="menu-item featured">
+              <div className="featured-badge">Most Popular</div>
+              <img 
+                src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600" 
+                alt="Premium Package" 
+                className="menu-item-image"
+              />
+              <div className="menu-item-content">
+                <h3 className="menu-item-title">Premium Package</h3>
+                <p className="menu-item-description">
+                  Ideal for medium-sized events and celebrations
+                </p>
+                <ul className="menu-items-list">
+                  <li>✓ Starter (4 varieties)</li>
+                  <li>✓ Main Course (6 varieties)</li>
+                  <li>✓ Dessert (3 varieties)</li>
+                  <li>✓ Beverages</li>
+                  <li>✓ Premium Setup & Decor</li>
+                </ul>
+                <p className="menu-item-price">₹1,000 <span>per person</span></p>
+              </div>
             </div>
+
             <div className="menu-item">
-              <div className="menu-emoji">🌿</div>
-              <h3>Vegan Options</h3>
-              <p>Plant-based cuisine that doesn't compromise on flavor</p>
-            </div>
-            <div className="menu-item">
-              <div className="menu-emoji">🍰</div>
-              <h3>Dessert Bar</h3>
-              <p>Artisan desserts and custom cakes for any occasion</p>
+              <img 
+                src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600" 
+                alt="Royal Package" 
+                className="menu-item-image"
+              />
+              <div className="menu-item-content">
+                <h3 className="menu-item-title">Royal Package</h3>
+                <p className="menu-item-description">
+                  For grand celebrations and luxury events
+                </p>
+                <ul className="menu-items-list">
+                  <li>✓ Starter (6 varieties)</li>
+                  <li>✓ Main Course (8 varieties)</li>
+                  <li>✓ Dessert (5 varieties)</li>
+                  <li>✓ Premium Beverages</li>
+                  <li>✓ Special Live Counters</li>
+                  <li>✓ Luxury Setup & Decor</li>
+                </ul>
+                <p className="menu-item-price">₹2,000 <span>per person</span></p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="catering-stats">
-        <div className="container">
-          <div className="stats-grid-new">
-            <div className="stat-item">
-              <h3>500+</h3>
-              <p>Events Catered</p>
-            </div>
-            <div className="stat-item">
-              <h3>50K+</h3>
-              <p>Happy Guests</p>
-            </div>
-            <div className="stat-item">
-              <h3>10+</h3>
-              <p>Years Experience</p>
-            </div>
-            <div className="stat-item">
-              <h3>100%</h3>
-              <p>Satisfaction Rate</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Booking Form */}
-      <section className="catering-booking">
+      {/* Catering Form Section */}
+      <section className="catering-form-section">
         <div className="container">
           <div className="form-container">
-            <h2>Request Catering Services</h2>
+            <h2>
+              Book Your <span className="gradient-text">Catering</span>
+            </h2>
+            <p className="form-subtitle">Fill in the details below and we'll get back to you within 24 hours</p>
+
             <form onSubmit={handleSubmit} className="catering-form">
               <div className="form-row">
                 <div className="form-group">
-                  <label>Event Type *</label>
-                  <select name="cateringType" value={formData.cateringType} onChange={handleChange} required>
-                    <option>Wedding</option>
-                    <option>Corporate</option>
-                    <option>Birthday</option>
-                    <option>Anniversary</option>
-                    <option>Other</option>
-                  </select>
+                  <label htmlFor="name">
+                    <FiUser /> Full Name <span className="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Enter your full name"
+                    required
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label>Event Name *</label>
-                  <input 
-                    type="text" 
-                    name="eventName" 
-                    value={formData.eventName} 
-                    onChange={handleChange} 
-                    required 
-                    placeholder="e.g., Smith Wedding Reception" 
+                  <label htmlFor="email">
+                    <FiMail /> Email Address <span className="required">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                    required
+                    disabled={loading}
                   />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Event Date *</label>
-                  <input 
-                    type="date" 
-                    name="eventDate" 
-                    value={formData.eventDate} 
-                    onChange={handleChange} 
-                    required 
+                  <label htmlFor="phone">
+                    <FiPhone /> Phone Number <span className="required">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Enter your phone number"
+                    required
+                    disabled={loading}
+                    pattern="[0-9]{10}"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Number of Guests *</label>
-                  <input 
-                    type="number" 
-                    name="numberOfGuests" 
-                    value={formData.numberOfGuests} 
-                    onChange={handleChange} 
-                    min="10" 
-                    required 
-                    placeholder="Minimum 10 guests" 
-                  />
+                  <label htmlFor="eventType">
+                    <FiCalendar /> Event Type <span className="required">*</span>
+                  </label>
+                  <select
+                    id="eventType"
+                    name="eventType"
+                    value={formData.eventType}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
+                  >
+                    <option value="">Select Event Type</option>
+                    <option value="wedding">Wedding</option>
+                    <option value="corporate">Corporate Event</option>
+                    <option value="birthday">Birthday Party</option>
+                    <option value="anniversary">Anniversary</option>
+                    <option value="engagement">Engagement</option>
+                    <option value="other">Other</option>
+                  </select>
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Menu Type *</label>
-                  <select name="menuType" value={formData.menuType} onChange={handleChange} required>
-                    <option>Vegetarian</option>
-                    <option>Non-Vegetarian</option>
-                    <option>Vegan</option>
-                    <option>Mixed</option>
-                  </select>
+                  <label htmlFor="eventDate">
+                    <FiCalendar /> Event Date <span className="required">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    id="eventDate"
+                    name="eventDate"
+                    value={formData.eventDate}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label>Budget Range *</label>
-                  <select name="budget" value={formData.budget} onChange={handleChange} required>
-                    <option value="">Select Budget</option>
-                    <option>$1,000 - $5,000</option>
-                    <option>$5,000 - $10,000</option>
-                    <option>$10,000 - $25,000</option>
-                    <option>$25,000+</option>
-                  </select>
+                  <label htmlFor="guestCount">
+                    <FiUsers /> Guest Count <span className="required">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    id="guestCount"
+                    name="guestCount"
+                    value={formData.guestCount}
+                    onChange={handleChange}
+                    placeholder="Approximate number of guests"
+                    required
+                    disabled={loading}
+                    min="1"
+                  />
                 </div>
               </div>
 
               <div className="form-group">
-                <label>Venue/Location *</label>
-                <input 
-                  type="text" 
-                  name="venue" 
-                  value={formData.venue} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="Event location or venue name" 
-                />
+                <label htmlFor="services">
+                  Services Required
+                </label>
+                <select
+                  id="services"
+                  name="services"
+                  value={formData.services}
+                  onChange={handleChange}
+                  disabled={loading}
+                >
+                  <option value="">Select Services</option>
+                  <option value="catering-only">Catering Only</option>
+                  <option value="catering-decor">Catering + Decor</option>
+                  <option value="full-service">Full Service (Catering + Decor + Planning)</option>
+                </select>
               </div>
 
               <div className="form-group">
-                <label>Special Dietary Requirements</label>
-                <input 
-                  type="text" 
-                  name="specialDietary" 
-                  value={formData.specialDietary} 
-                  onChange={handleChange} 
-                  placeholder="Allergies, restrictions, preferences" 
-                />
+                <label htmlFor="message">
+                  <FiMessageSquare /> Additional Message
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  placeholder="Tell us more about your event, special requirements, menu preferences, etc."
+                  rows="4"
+                  disabled={loading}
+                ></textarea>
               </div>
 
-              <div className="form-group">
-                <label>Additional Notes</label>
-                <textarea 
-                  name="additionalNotes" 
-                  value={formData.additionalNotes} 
-                  onChange={handleChange} 
-                  rows="4" 
-                  placeholder="Tell us more about your event, theme, or specific requirements" 
-                />
-              </div>
-
-              <button type="submit" className="premium-btn">Submit Catering Request</button>
+              <button 
+                type="submit" 
+                className="form-submit"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner"></span>
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <FiSend /> Submit Inquiry
+                  </>
+                )}
+              </button>
             </form>
           </div>
         </div>
