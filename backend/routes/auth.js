@@ -67,11 +67,12 @@ router.post('/admin/request-otp', async (req, res) => {
       `
     });
 
+    console.log('✅ [ADMIN OTP] Sent to:', email);
     res.json({ success: true, message: 'OTP sent to your email' });
 
   } catch (error) {
-    console.error('❌ Admin OTP Error:', error.message);
-    res.status(500).json({ success: false, message: 'Failed to send OTP' });
+    console.error('❌ [ADMIN OTP] Error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to send OTP', error: error.message });
   }
 });
 
@@ -86,8 +87,17 @@ router.post('/admin/login', async (req, res) => {
 
     const storedOTP = otpStore.get(email.toLowerCase());
     
-    if (!storedOTP || Date.now() > storedOTP.expiresAt || otp !== storedOTP.otp) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+    if (!storedOTP) {
+      return res.status(400).json({ success: false, message: 'OTP not found. Please request a new one.' });
+    }
+
+    if (Date.now() > storedOTP.expiresAt) {
+      otpStore.delete(email.toLowerCase());
+      return res.status(400).json({ success: false, message: 'OTP expired. Please request a new one.' });
+    }
+
+    if (otp !== storedOTP.otp) {
+      return res.status(400).json({ success: false, message: 'Invalid OTP' });
     }
 
     otpStore.delete(email.toLowerCase());
@@ -98,6 +108,7 @@ router.post('/admin/login', async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    console.log('✅ [ADMIN LOGIN] Success:', email);
     res.json({
       success: true,
       message: 'Login successful',
@@ -106,20 +117,23 @@ router.post('/admin/login', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Admin Login Error:', error.message);
-    res.status(500).json({ success: false, message: 'Login failed' });
+    console.error('❌ [ADMIN LOGIN] Error:', error.message);
+    res.status(500).json({ success: false, message: 'Login failed', error: error.message });
   }
 });
 
 // ===== USER ROUTES =====
 
-// POST /api/auth/register - Name, Phone, Email, Password
+// POST /api/auth/register - Name, Email, Phone, Password
 router.post('/register', async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
     
+    console.log('📝 [REGISTER] Attempting registration:', { name, email, phone });
+    
     // Validate required fields
     if (!name || !email || !phone || !password) {
+      console.log('❌ [REGISTER] Missing fields');
       return res.status(400).json({ 
         success: false, 
         message: 'Name, email, phone and password are required' 
@@ -129,19 +143,23 @@ router.post('/register', async (req, res) => {
     // Check if user exists
     let user = await User.findOne({ $or: [{ email }, { phone }] });
     if (user) {
+      console.log('❌ [REGISTER] User already exists:', email);
       return res.status(400).json({ 
         success: false, 
         message: 'User already exists with this email or phone' 
       });
     }
 
-    // Hash password
+    // Hash password with salt
+    console.log('🔐 [REGISTER] Hashing password...');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    console.log('✅ [REGISTER] Password hashed');
 
     // Create user
     user = new User({ name, email, phone, password: hashedPassword });
     await user.save();
+    console.log('✅ [REGISTER] User saved to database:', user._id);
 
     // Generate token
     const token = jwt.sign(
@@ -150,7 +168,7 @@ router.post('/register', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    console.log('✅ [REGISTER] New user:', email);
+    console.log('✅ [REGISTER] New user registered:', email);
 
     res.status(201).json({
       success: true,
@@ -166,7 +184,12 @@ router.post('/register', async (req, res) => {
 
   } catch (error) {
     console.error('❌ [REGISTER] Error:', error.message);
-    res.status(500).json({ success: false, message: 'Registration failed' });
+    console.error('❌ [REGISTER] Stack:', error.stack);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Registration failed',
+      error: error.message 
+    });
   }
 });
 
@@ -175,7 +198,10 @@ router.post('/login', async (req, res) => {
   try {
     const { phone, password } = req.body;
     
+    console.log('🔐 [LOGIN] Attempting login with phone:', phone);
+    
     if (!phone || !password) {
+      console.log('❌ [LOGIN] Missing phone or password');
       return res.status(400).json({ 
         success: false, 
         message: 'Phone number and password are required' 
@@ -185,15 +211,24 @@ router.post('/login', async (req, res) => {
     // Find user by phone
     const user = await User.findOne({ phone });
     if (!user) {
+      console.log('❌ [LOGIN] User not found with phone:', phone);
       return res.status(400).json({ 
         success: false, 
         message: 'User not found. Please register first.' 
       });
     }
 
+    console.log('✅ [LOGIN] User found:', user.email);
+    console.log('🔐 [LOGIN] Stored password hash:', user.password.substring(0, 20) + '...');
+    console.log('🔐 [LOGIN] Password length:', user.password.length);
+
     // Check password
+    console.log('🔐 [LOGIN] Comparing passwords...');
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('🔐 [LOGIN] Password match result:', isMatch);
+    
     if (!isMatch) {
+      console.log('❌ [LOGIN] Invalid password for:', user.email);
       return res.status(400).json({ 
         success: false, 
         message: 'Invalid password' 
@@ -207,7 +242,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    console.log('✅ [LOGIN] User logged in:', user.email);
+    console.log('✅ [LOGIN] User logged in successfully:', user.email);
 
     res.json({
       success: true,
@@ -223,7 +258,12 @@ router.post('/login', async (req, res) => {
 
   } catch (error) {
     console.error('❌ [LOGIN] Error:', error.message);
-    res.status(500).json({ success: false, message: 'Login failed' });
+    console.error('❌ [LOGIN] Stack:', error.stack);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Login failed',
+      error: error.message 
+    });
   }
 });
 
@@ -368,7 +408,7 @@ router.post('/forgot-password', async (req, res) => {
 
   } catch (error) {
     console.error('❌ [FORGOT PASSWORD] Error:', error.message);
-    res.status(500).json({ success: false, message: 'Failed to send reset link' });
+    res.status(500).json({ success: false, message: 'Failed to send reset link', error: error.message });
   }
 });
 
@@ -447,7 +487,7 @@ router.post('/reset-password', async (req, res) => {
 
   } catch (error) {
     console.error('❌ [RESET PASSWORD] Error:', error.message);
-    res.status(500).json({ success: false, message: 'Failed to reset password' });
+    res.status(500).json({ success: false, message: 'Failed to reset password', error: error.message });
   }
 });
 
@@ -471,7 +511,7 @@ router.get('/me', async (req, res) => {
 
   } catch (error) {
     console.error('❌ [GET /me] Error:', error.message);
-    res.status(401).json({ success: false, message: 'Invalid token' });
+    res.status(401).json({ success: false, message: 'Invalid token', error: error.message });
   }
 });
 
