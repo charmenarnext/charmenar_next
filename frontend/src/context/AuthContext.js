@@ -19,16 +19,22 @@ export const AuthProvider = ({ children }) => {
 
   const API_BASE_URL = config.API_URL;
 
-  // Check if user is already logged in on mount
+  // Check if user is already logged in on page load
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       const token = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
       
+      console.log('🔍 Checking auth on load...', { 
+        hasToken: !!token, 
+        hasUser: !!storedUser 
+      });
+      
       if (token && storedUser) {
         try {
-          setUser(JSON.parse(storedUser));
-          console.log('✅ User already logged in:', JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          console.log('✅ User already logged in:', parsedUser);
         } catch (error) {
           console.error('❌ Error parsing stored user:', error);
           localStorage.removeItem('token');
@@ -41,11 +47,11 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Register (Name, Email, Phone, Password)
+  // Register function
   const register = async (name, email, phone, password) => {
-    console.log('📝 Register attempt:', { name, email, phone });
-    
     try {
+      console.log('📝 Register attempt:', { name, email, phone });
+      
       const response = await axios.post(
         `${API_BASE_URL}/auth/register`,
         { name, email, phone, password },
@@ -58,9 +64,14 @@ export const AuthProvider = ({ children }) => {
       console.log('✅ Register response:', response.data);
       
       if (response.data.token && response.data.user) {
+        // Save to localStorage IMMEDIATELY
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // Update state
         setUser(response.data.user);
+        
+        console.log('✅ Registration successful, user saved:', response.data.user);
         
         return response.data;
       } else {
@@ -78,11 +89,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Login (Phone + Password)
+  // Login function
   const login = async (phone, password) => {
-    console.log('🔐 Login attempt:', { phone });
-    
     try {
+      console.log('🔐 Login attempt:', { phone });
+      
       const response = await axios.post(
         `${API_BASE_URL}/auth/login`,
         { phone, password },
@@ -95,9 +106,21 @@ export const AuthProvider = ({ children }) => {
       console.log('✅ Login response:', response.data);
       
       if (response.data.token && response.data.user) {
+        // CRITICAL: Save to localStorage FIRST
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // THEN update state
         setUser(response.data.user);
+        
+        console.log('✅ Login successful, user saved to localStorage:', response.data.user);
+        console.log('🔑 Token saved:', response.data.token.substring(0, 20) + '...');
+        
+        // Verify it was saved
+        console.log('📦 Verifying localStorage:', {
+          tokenExists: !!localStorage.getItem('token'),
+          userExists: !!localStorage.getItem('user')
+        });
         
         return response.data;
       } else {
@@ -115,7 +138,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout
+  // Logout function
   const logout = () => {
     console.log('🚪 Logging out...');
     localStorage.removeItem('token');
