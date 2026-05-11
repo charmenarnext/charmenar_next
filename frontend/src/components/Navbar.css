@@ -24,7 +24,7 @@
   align-items: center;
 }
 
-/* ===== LOGO STYLES ===== */
+/* ===== LOGO ===== */
 .navbar-logo {
   display: flex;
   align-items: center;
@@ -52,7 +52,7 @@
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -62,7 +62,12 @@
 .navbar-menu {
   display: flex;
   list-style: none;
-  gap: 35px;
+  gap: 30px;
+  align-items: center;
+}
+
+.navbar-menu li {
+  display: flex;
   align-items: center;
 }
 
@@ -83,7 +88,7 @@
   left: 0;
   width: 0;
   height: 2px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
   transition: width 0.3s ease;
 }
 
@@ -94,12 +99,11 @@
 
 .navbar-link:hover,
 .navbar-link.active {
-  color: #667eea;
+  color: #D4AF37;
 }
 
+/* ===== AUTH BUTTONS - CONSISTENT WIDTH ===== */
 .navbar-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
   padding: 10px 25px;
   border-radius: 25px;
   text-decoration: none;
@@ -107,6 +111,29 @@
   font-size: 14px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.navbar-btn.login-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.navbar-btn.register-btn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.navbar-btn.logout-btn {
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+  color: white;
 }
 
 .navbar-btn:hover {
@@ -114,8 +141,21 @@
   box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
 }
 
-.register-btn {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+/* ===== USER GREETING ===== */
+.user-greeting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-weight: 600;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 25px;
+  cursor: default;
+  white-space: nowrap;
+  min-width: 100px;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 /* ===== HAMBURGER MENU ===== */
@@ -129,7 +169,7 @@
 .hamburger-line {
   width: 25px;
   height: 3px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
   border-radius: 3px;
   transition: all 0.3s ease;
 }
@@ -180,25 +220,14 @@
   .navbar-logo-text {
     font-size: 20px;
   }
-  
-}
 
-.user-greeting {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: white;
-  font-weight: 600;
-  padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 25px;
-  cursor: default;
-}
+  .navbar-btn {
+    width: 100%;
+    justify-content: center;
+  }
 
-.logout-btn {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.logout-btn:hover {
-  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+  .user-greeting {
+    width: 100%;
+    justify-content: center;
+  }
 }

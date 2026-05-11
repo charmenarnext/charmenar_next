@@ -21,11 +21,13 @@ const Navbar = () => {
   const handleLogout = () => {
     logout();
     navigate('/');
+    setIsMobileMenuOpen(false);
   };
 
   return (
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
+        {/* Logo */}
         <Link to="/" className="navbar-logo">
           <img src="/logo.png" alt="Charmenar Next" className="navbar-logo-img" />
           <span className="navbar-logo-text">
@@ -33,6 +35,7 @@ const Navbar = () => {
           </span>
         </Link>
 
+        {/* Navigation Menu */}
         <ul className={`navbar-menu ${isMobileMenuOpen ? 'active' : ''}`}>
           <li><Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link></li>
           <li><Link to="/catering" onClick={() => setIsMobileMenuOpen(false)}>Catering</Link></li>
@@ -40,15 +43,18 @@ const Navbar = () => {
           <li><Link to="/about" onClick={() => setIsMobileMenuOpen(false)}>About</Link></li>
           <li><Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</Link></li>
           
-          {isAuthenticated ? (
+          {/* Admin Dashboard Link (if admin) */}
+          {isAdmin && (
+            <li><Link to="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link></li>
+          )}
+          
+          {/* Auth Buttons - Consistent Layout */}
+          {isAuthenticated && user ? (
             <>
-              {isAdmin && (
-                <li><Link to="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link></li>
-              )}
               <li>
-                <span className="user-greeting">
-                  <FiUser /> {user?.name}
-                </span>
+                <div className="user-greeting">
+                  <FiUser /> {user.name}
+                </div>
               </li>
               <li>
                 <button onClick={handleLogout} className="navbar-btn logout-btn">
@@ -58,12 +64,21 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <li><Link to="/login" className="navbar-btn">Login</Link></li>
-              <li><Link to="/register" className="navbar-btn register-btn">Register</Link></li>
+              <li>
+                <Link to="/login" className="navbar-btn login-btn" onClick={() => setIsMobileMenuOpen(false)}>
+                  Login
+                </Link>
+              </li>
+              <li>
+                <Link to="/register" className="navbar-btn register-btn" onClick={() => setIsMobileMenuOpen(false)}>
+                  Register
+                </Link>
+              </li>
             </>
           )}
         </ul>
 
+        {/* Mobile Hamburger */}
         <div 
           className={`hamburger ${isMobileMenuOpen ? 'active' : ''}`}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
