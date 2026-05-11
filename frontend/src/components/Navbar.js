@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FiMenu, FiX, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiUser, FiLogOut } from 'react-icons/fi';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -31,7 +31,7 @@ const Navbar = () => {
         <Link to="/" className="navbar-logo">
           <img src="/logo.png" alt="Charmenar Next" className="navbar-logo-img" />
           <span className="navbar-logo-text">
-            Charmenar <span className="gradient-text">Next</span>
+            Charmenar <span className="gradient-text" style={{color: '#D4AF37'}}>Next</span>
           </span>
         </Link>
 
@@ -43,12 +43,12 @@ const Navbar = () => {
           <li><Link to="/about" onClick={() => setIsMobileMenuOpen(false)}>About</Link></li>
           <li><Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</Link></li>
           
-          {/* Admin Dashboard Link (if admin) */}
+          {/* Admin Dashboard Link */}
           {isAdmin && (
             <li><Link to="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link></li>
           )}
           
-          {/* Auth Buttons - Consistent Layout */}
+          {/* Auth Buttons */}
           {isAuthenticated && user ? (
             <>
               <li>
