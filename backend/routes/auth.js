@@ -2,9 +2,17 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const sgMail = require('@sendgrid/mail');
 const User = require('../models/User');
+
+// Configure SendGrid
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  console.log('✅ [EMAIL] SendGrid configured');
+} else {
+  console.warn('⚠️ [EMAIL] SendGrid API key not found');
+}
 
 // In-memory storage
 const otpStore = new Map();
@@ -13,14 +21,7 @@ const resetTokenStore = new Map();
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 const generateResetToken = () => crypto.randomBytes(32).toString('hex');
 
-// ==========================================
-// DEBUG: Check Environment Variables
-// ==========================================
-console.log('🔍 [DEBUG] Environment Variables Check:');
-console.log('EMAIL_USER:', process.env.EMAIL_USER ? '✅ Set' : '❌ NOT SET');
-console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? `✅ Set (${process.env.EMAIL_PASS.length} chars)` : '❌ NOT SET');
-console.log('ADMIN_EMAIL:', process.env.ADMIN_EMAIL || '❌ NOT SET (using default)');
-console.log('JWT_SECRET:', process.env.JWT_SECRET ? '✅ Set' : '❌ NOT SET');
+console.log('📦 [AUTH ROUTES] Initialized');
 
 // ==========================================
 // ADMIN ROUTES
@@ -30,7 +31,7 @@ console.log('JWT_SECRET:', process.env.JWT_SECRET ? '✅ Set' : '❌ NOT SET');
 router.post('/admin/request-otp', async (req, res) => {
   try {
     const { email } = req.body;
-    console.log('\n📥 [ADMIN OTP] Request received for:', email);
+    console.log('📥 [ADMIN OTP] Request received for:', email);
 
     if (!email) {
       return res.status(400).json({ success: false, message: 'Email is required' });
@@ -45,124 +46,75 @@ router.post('/admin/request-otp', async (req, res) => {
     const otp = generateOTP();
     otpStore.set(email.toLowerCase(), {
       otp,
-      expiresAt: Date.now() + 10 * 60 * 1000,
+      expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
       attempts: 0
     });
 
-    console.log('🔑 [ADMIN OTP] Generated:', otp);
+    console.log(`🔑 [ADMIN OTP] Generated: ${otp}`);
 
-    // ===== CHECK EMAIL CONFIGURATION =====
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.log('❌ [EMAIL] Environment variables NOT configured!');
-      console.log('EMAIL_USER:', process.env.EMAIL_USER || 'NOT SET');
-      console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'SET (hidden)' : 'NOT SET');
-      
-      return res.json({
-        success: true,
-        message: 'Email not configured. Check server logs.',
-        otp: otp,
-        debug: {
-          EMAIL_USER: process.env.EMAIL_USER ? 'Set' : 'NOT SET',
-          EMAIL_PASS: process.env.EMAIL_PASS ? 'Set' : 'NOT SET'
-        }
-      });
-    }
+    // ===== SEND EMAIL VIA SENDGRID =====
+    if (process.env.SENDGRID_API_KEY) {
+      try {
+        console.log('📤 Sending email via SendGrid...');
 
-    console.log('✅ [EMAIL] Configuration found:');
-    console.log('   From:', process.env.EMAIL_USER);
-    console.log('   To:', email);
-
-    // ===== CREATE TRANSPORTER WITH DEBUGGING =====
-    let transporter;
-    try {
-      transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-        },
-        tls: { 
-          rejectUnauthorized: false,
-          minVersion: 'TLSv1.2'
-        },
-        debug: true, // Enable SMTP debugging
-        logger: true // Log to console
-      });
-
-      console.log('🔧 [EMAIL] Transporter created, verifying connection...');
-      
-      // Verify connection
-      await transporter.verify();
-      console.log('✅ [EMAIL] SMTP connection verified successfully!');
-
-    } catch (transportError) {
-      console.error('❌ [EMAIL] Transporter creation failed:');
-      console.error('   Error:', transportError.message);
-      console.error('   Code:', transportError.code);
-      console.error('   Command:', transportError.command);
-      
-      return res.json({
-        success: true,
-        message: 'Email configuration error. Check server logs.',
-        otp: otp,
-        error: transportError.message
-      });
-    }
-
-    // ===== SEND EMAIL =====
-    try {
-      console.log('📤 [EMAIL] Sending email...');
-      
-      const mailOptions = {
-        from: `"Charmenar Next Admin" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: '🔐 Admin Portal - OTP Verification',
-        html: `
-          <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4;">
-            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
-              <h2 style="color: #667eea; text-align: center;">Charmenar Next Admin</h2>
-              <p style="text-align: center; color: #666;">Your OTP is:</p>
-              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px;">
-                <span style="font-size: 36px; font-weight: bold; color: white; letter-spacing: 8px;">${otp}</span>
+        const msg = {
+          to: email,
+          from: {
+            email: process.env.SENDGRID_FROM_EMAIL || 'charmenarnext@gmail.com',
+            name: process.env.SENDGRID_FROM_NAME || 'Charmenar Next Admin'
+          },
+          subject: '🔐 Admin Portal - OTP Verification',
+          html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4;">
+              <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: #667eea; text-align: center; margin-bottom: 20px;">Charmenar Next Admin Portal</h2>
+                <p style="color: #555; text-align: center;">Your One-Time Password (OTP) is:</p>
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px;">
+                  <span style="font-size: 36px; font-weight: bold; color: white; letter-spacing: 8px;">${otp}</span>
+                </div>
+                <p style="color: #888; text-align: center; font-size: 12px;">
+                  This OTP expires in 10 minutes.<br>
+                  If you didn't request this, please ignore this email.
+                </p>
               </div>
-              <p style="text-align: center; color: #999; font-size: 12px;">Expires in 10 minutes.</p>
             </div>
-          </div>
-        `,
-        text: `Your OTP is: ${otp}`
-      };
+          `,
+          text: `Your OTP is: ${otp}\n\nThis OTP expires in 10 minutes.`
+        };
 
-      const info = await transporter.sendMail(mailOptions);
-      
-      console.log('✅ [EMAIL] Email sent successfully!');
-      console.log('   Message ID:', info.messageId);
-      console.log('   Preview URL:', nodemailer.getTestMessageUrl(info));
+        await sgMail.send(msg);
+        console.log('✅ [EMAIL] SendGrid email sent successfully to:', email);
+        
+        return res.json({
+          success: true,
+          message: 'OTP sent to your email. Check inbox and spam folder.'
+        });
 
+      } catch (sendError) {
+        console.error('❌ SendGrid Error:', sendError.message);
+        if (sendError.response) {
+          console.error('❌ SendGrid Response Body:', sendError.response.body);
+        }
+        
+        // Fallback: return OTP so admin can still login
+        return res.json({
+          success: true,
+          message: 'Email service temporarily unavailable. Use this OTP.',
+          otp: otp
+        });
+      }
+    } else {
+      console.log('⚠️ SendGrid not configured. Returning OTP for testing.');
       return res.json({
         success: true,
-        message: 'OTP sent to your email. Check inbox and spam folder.'
-      });
-
-    } catch (sendError) {
-      console.error('❌ [EMAIL] Failed to send email:');
-      console.error('   Error:', sendError.message);
-      console.error('   Code:', sendError.code);
-      console.error('   Command:', sendError.command);
-      console.error('   Response:', sendError.response);
-      
-      // Return OTP as fallback
-      return res.json({
-        success: true,
-        message: 'Email failed to send. Use this OTP.',
-        otp: otp,
-        error: sendError.message
+        message: 'Test mode active. Use this OTP.',
+        otp: otp
       });
     }
 
   } catch (error) {
     console.error('❌ [ADMIN OTP] Critical Error:', error.message);
-    console.error('Stack:', error.stack);
-    res.status(500).json({ success: false, message: 'Failed to process request' });
+    res.status(500).json({ success: false, message: 'Failed to process OTP request' });
   }
 });
 
@@ -173,24 +125,33 @@ router.post('/admin/login', async (req, res) => {
     console.log('🔐 [ADMIN LOGIN] Attempting login for:', email);
 
     if (!email || !otp) {
-      return res.status(400).json({ success: false, message: 'Email and OTP required' });
+      return res.status(400).json({ success: false, message: 'Email and OTP are required' });
     }
 
     const storedData = otpStore.get(email.toLowerCase());
 
     if (!storedData) {
-      return res.status(400).json({ success: false, message: 'No OTP found. Request a new one.' });
+      return res.status(400).json({ success: false, message: 'No OTP found. Please request a new one.' });
     }
 
     if (Date.now() > storedData.expiresAt) {
       otpStore.delete(email.toLowerCase());
-      return res.status(400).json({ success: false, message: 'OTP expired.' });
+      return res.status(400).json({ success: false, message: 'OTP has expired. Please request a new one.' });
     }
 
     if (otp !== storedData.otp) {
-      return res.status(400).json({ success: false, message: 'Invalid OTP' });
+      storedData.attempts += 1;
+      if (storedData.attempts >= 3) {
+        otpStore.delete(email.toLowerCase());
+        return res.status(400).json({ success: false, message: 'Too many failed attempts. Please request a new OTP.' });
+      }
+      return res.status(400).json({
+        success: false,
+        message: `Invalid OTP. Attempts remaining: ${3 - storedData.attempts}`
+      });
     }
 
+    // OTP verified successfully
     otpStore.delete(email.toLowerCase());
 
     const token = jwt.sign(
@@ -199,7 +160,7 @@ router.post('/admin/login', async (req, res) => {
       { expiresIn: '24h' }
     );
 
-    console.log('✅ [ADMIN LOGIN] Success');
+    console.log('✅ [ADMIN LOGIN] Success for:', email);
     res.json({
       success: true,
       message: 'Login successful',
@@ -208,35 +169,42 @@ router.post('/admin/login', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ [ADMIN LOGIN] Error:', error.message);
+    console.error('❌ [ADMIN LOGIN] Critical Error:', error.message);
     res.status(500).json({ success: false, message: 'Login failed' });
   }
 });
 
 // ==========================================
-// USER ROUTES (Keep existing code)
+// USER ROUTES
 // ==========================================
 
 router.post('/register', async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
+    console.log('📝 [REGISTER] Attempting registration for:', email);
+
     if (!name || !email || !phone || !password) {
-      return res.status(400).json({ success: false, message: 'All fields required' });
+      return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
-    let user = await User.findOne({ $or: [{ email }, { phone }] });
-    if (user) {
-      return res.status(400).json({ success: false, message: 'User already exists' });
+    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'User already exists with this email or phone' });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    user = new User({ name, email, phone, password: hashedPassword });
+    const user = new User({ name, email, phone, password: hashedPassword });
     await user.save();
 
-    const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
+    console.log('✅ [REGISTER] Success:', user._id);
     res.status(201).json({
       success: true,
       message: 'Registration successful',
@@ -245,20 +213,22 @@ router.post('/register', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ [REGISTER] Error:', error.message);
-    res.status(500).json({ success: false, message: 'Registration failed' });
+    res.status(500).json({ success: false, message: 'Registration failed', error: error.message });
   }
 });
 
 router.post('/login', async (req, res) => {
   try {
     const { phone, password } = req.body;
+    console.log('🔐 [LOGIN] Attempting login for phone:', phone);
+
     if (!phone || !password) {
-      return res.status(400).json({ success: false, message: 'Phone and password required' });
+      return res.status(400).json({ success: false, message: 'Phone and password are required' });
     }
 
     const user = await User.findOne({ phone });
     if (!user) {
-      return res.status(400).json({ success: false, message: 'User not found' });
+      return res.status(400).json({ success: false, message: 'User not found. Please register first.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -266,8 +236,13 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid password' });
     }
 
-    const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
+    console.log('✅ [LOGIN] Success:', user.email);
     res.json({
       success: true,
       message: 'Login successful',
@@ -276,69 +251,102 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ [LOGIN] Error:', error.message);
-    res.status(500).json({ success: false, message: 'Login failed' });
+    res.status(500).json({ success: false, message: 'Login failed', error: error.message });
   }
 });
 
-// Forgot password & reset password routes
+// Forgot password route
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ success: false, message: 'Email required' });
+    if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.json({ success: true, message: 'If email exists, reset link sent' });
+      return res.json({ success: true, message: 'If the email exists, a reset link has been sent' });
     }
 
     const token = generateResetToken();
-    resetTokenStore.set(email, { token, expiresAt: Date.now() + 3600000, userId: user._id });
+    resetTokenStore.set(email, {
+      token,
+      expiresAt: Date.now() + 3600000, // 1 hour
+      userId: user._id
+    });
 
     const resetLink = `${process.env.FRONTEND_URL || 'https://charmenarnext.github.io'}/charmenar_next/reset-password?token=${token}&email=${email}`;
-    console.log('🔗 Reset link:', resetLink);
+    
+    // Send via SendGrid if configured
+    if (process.env.SENDGRID_API_KEY) {
+      try {
+        const msg = {
+          to: email,
+          from: {
+            email: process.env.SENDGRID_FROM_EMAIL || 'charmenarnext@gmail.com',
+            name: process.env.SENDGRID_FROM_NAME || 'Charmenar Next'
+          },
+          subject: '🔐 Password Reset Request',
+          html: `<p>Click to reset your password:</p><a href="${resetLink}">${resetLink}</a><p>This link expires in 1 hour.</p>`,
+          text: `Reset your password: ${resetLink}\n\nThis link expires in 1 hour.`
+        };
+        await sgMail.send(msg);
+        console.log('✅ [FORGOT PASSWORD] Email sent via SendGrid');
+      } catch (err) {
+        console.log('⚠️ [FORGOT PASSWORD] Email failed, link:', resetLink);
+      }
+    }
 
-    res.json({ success: true, message: 'If email exists, reset link sent' });
+    res.json({ success: true, message: 'If the email exists, a reset link has been sent' });
   } catch (error) {
-    console.error('❌ Error:', error.message);
-    res.status(500).json({ success: false, message: 'Failed' });
+    console.error('❌ [FORGOT PASSWORD] Error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to process request' });
   }
 });
 
+// Reset password route
 router.post('/reset-password', async (req, res) => {
   try {
     const { token, email, newPassword, confirmPassword } = req.body;
-    
+
+    if (!token || !email || !newPassword || !confirmPassword) {
+      return res.status(400).json({ success: false, message: 'All fields are required' });
+    }
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ success: false, message: 'Passwords do not match' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
     }
 
     const storedData = resetTokenStore.get(email);
     if (!storedData || storedData.token !== token) {
-      return res.status(400).json({ success: false, message: 'Invalid token' });
+      return res.status(400).json({ success: false, message: 'Invalid reset token' });
     }
-
     if (Date.now() > storedData.expiresAt) {
       resetTokenStore.delete(email);
-      return res.status(400).json({ success: false, message: 'Token expired' });
+      return res.status(400).json({ success: false, message: 'Reset token has expired' });
     }
 
     const user = await User.findById(storedData.userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
 
     resetTokenStore.delete(email);
-    res.json({ success: true, message: 'Password reset successful' });
+    console.log('✅ [RESET PASSWORD] Success for:', email);
+    res.json({ success: true, message: 'Password reset successful. Please login with your new password.' });
   } catch (error) {
-    console.error('❌ Error:', error.message);
-    res.status(500).json({ success: false, message: 'Failed' });
+    console.error('❌ [RESET PASSWORD] Error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to reset password' });
   }
 });
 
+// Get user info
 router.get('/me', async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) return res.status(401).json({ success: false, message: 'No token' });
+    if (!token) return res.status(401).json({ success: false, message: 'No token provided' });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId).select('-password');
@@ -346,6 +354,7 @@ router.get('/me', async (req, res) => {
 
     res.json({ success: true, user });
   } catch (error) {
+    console.error('❌ [GET /me] Error:', error.message);
     res.status(401).json({ success: false, message: 'Invalid token' });
   }
 });
