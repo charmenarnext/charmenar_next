@@ -6,21 +6,17 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const User = require('../models/User');
 
-// ===== OTP & Token Storage (In-memory - use Redis/DB in production) =====
+// ===== OTP & Token Storage =====
 const otpStore = new Map();
 const resetTokenStore = new Map();
 
-// Generate 6-digit OTP
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
-
-// Generate reset token
 const generateResetToken = () => crypto.randomBytes(32).toString('hex');
 
 console.log('📦 [AUTH ROUTES] Registering routes...');
 
 // ===== ADMIN ROUTES =====
 
-// POST /api/auth/admin/request-otp
 router.post('/admin/request-otp', async (req, res) => {
   try {
     const { email } = req.body;
@@ -39,7 +35,6 @@ router.post('/admin/request-otp', async (req, res) => {
     
     otpStore.set(email.toLowerCase(), { otp, expiresAt, attempts: 0 });
 
-    // Send email via Gmail
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -76,7 +71,6 @@ router.post('/admin/request-otp', async (req, res) => {
   }
 });
 
-// POST /api/auth/admin/login
 router.post('/admin/login', async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -124,40 +118,48 @@ router.post('/admin/login', async (req, res) => {
 
 // ===== USER ROUTES =====
 
-// POST /api/auth/register - Name, Email, Phone, Password
 router.post('/register', async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
     
-    console.log('📝 [REGISTER] Attempting registration:', { name, email, phone });
+    console.log('📝 [REGISTER] Request received:', { name, email, phone });
     
-    // Validate required fields
     if (!name || !email || !phone || !password) {
-      console.log('❌ [REGISTER] Missing fields');
+      console.log('❌ [REGISTER] Missing required fields');
       return res.status(400).json({ 
         success: false, 
-        message: 'Name, email, phone and password are required' 
+        message: 'All fields are required' 
       });
     }
 
     // Check if user exists
-    let user = await User.findOne({ $or: [{ email }, { phone }] });
-    if (user) {
-      console.log('❌ [REGISTER] User already exists:', email);
+    let existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+    if (existingUser) {
+      console.log('❌ [REGISTER] User already exists');
       return res.status(400).json({ 
         success: false, 
         message: 'User already exists with this email or phone' 
       });
     }
 
-    // Hash password with salt
+    // Hash password - CRITICAL STEP
     console.log('🔐 [REGISTER] Hashing password...');
-    const salt = await bcrypt.genSalt(10);
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
     const hashedPassword = await bcrypt.hash(password, salt);
-    console.log('✅ [REGISTER] Password hashed');
+    
+    console.log('✅ [REGISTER] Password hashed successfully');
+    console.log('📊 [REGISTER] Hash length:', hashedPassword.length);
+    console.log('📊 [REGISTER] Hash starts with:', hashedPassword.substring(0, 7));
 
-    // Create user
-    user = new User({ name, email, phone, password: hashedPassword });
+    // Create and save user
+    const user = new User({ 
+      name, 
+      email, 
+      phone, 
+      password: hashedPassword 
+    });
+    
     await user.save();
     console.log('✅ [REGISTER] User saved to database:', user._id);
 
@@ -168,7 +170,7 @@ router.post('/register', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    console.log('✅ [REGISTER] New user registered:', email);
+    console.log('✅ [REGISTER] Registration successful:', email);
 
     res.status(201).json({
       success: true,
@@ -193,12 +195,12 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// POST /api/auth/login - Phone + Password
 router.post('/login', async (req, res) => {
   try {
     const { phone, password } = req.body;
     
-    console.log('🔐 [LOGIN] Attempting login with phone:', phone);
+    console.log('🔐 [LOGIN] Attempting login for phone:', phone);
+    console.log('🔐 [LOGIN] Password length:', password?.length);
     
     if (!phone || !password) {
       console.log('❌ [LOGIN] Missing phone or password');
@@ -210,6 +212,7 @@ router.post('/login', async (req, res) => {
 
     // Find user by phone
     const user = await User.findOne({ phone });
+    
     if (!user) {
       console.log('❌ [LOGIN] User not found with phone:', phone);
       return res.status(400).json({ 
@@ -219,16 +222,20 @@ router.post('/login', async (req, res) => {
     }
 
     console.log('✅ [LOGIN] User found:', user.email);
-    console.log('🔐 [LOGIN] Stored password hash:', user.password.substring(0, 20) + '...');
-    console.log('🔐 [LOGIN] Password length:', user.password.length);
+    console.log('📊 [LOGIN] Stored password hash:', user.password.substring(0, 20) + '...');
+    console.log('📊 [LOGIN] Stored hash length:', user.password.length);
+    console.log('📊 [LOGIN] Hash starts with:', user.password.substring(0, 7));
 
-    // Check password
+    // Compare passwords
     console.log('🔐 [LOGIN] Comparing passwords...');
     const isMatch = await bcrypt.compare(password, user.password);
     console.log('🔐 [LOGIN] Password match result:', isMatch);
     
     if (!isMatch) {
-      console.log('❌ [LOGIN] Invalid password for:', user.email);
+      console.log('❌ [LOGIN] Password does not match!');
+      console.log('📝 [LOGIN] Entered password length:', password.length);
+      console.log('📝 [LOGIN] Entered password:', password);
+      
       return res.status(400).json({ 
         success: false, 
         message: 'Invalid password' 
@@ -242,7 +249,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    console.log('✅ [LOGIN] User logged in successfully:', user.email);
+    console.log('✅ [LOGIN] Login successful:', user.email);
 
     res.json({
       success: true,
@@ -267,43 +274,35 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// POST /api/auth/forgot-password - Send reset link
+// ===== FORGOT PASSWORD ROUTES =====
+
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
     
     if (!email) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Email is required' 
-      });
+      return res.status(400).json({ success: false, message: 'Email is required' });
     }
 
-    // Find user
     const user = await User.findOne({ email });
     if (!user) {
-      // Don't reveal if user exists or not (security)
       return res.json({ 
         success: true, 
         message: 'If the email exists, a reset link has been sent' 
       });
     }
 
-    // Generate reset token
     const resetToken = generateResetToken();
-    const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
+    const expiresAt = Date.now() + 60 * 60 * 1000;
     
-    // Store token
     resetTokenStore.set(user.email, {
       token: resetToken,
       expiresAt,
       userId: user._id
     });
 
-    // Create reset link
     const resetLink = `${process.env.FRONTEND_URL || 'https://charmenarnext.github.io'}/charmenar_next/reset-password?token=${resetToken}&email=${user.email}`;
 
-    // Send email via Gmail
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -320,91 +319,24 @@ router.post('/forgot-password', async (req, res) => {
       html: `
         <!DOCTYPE html>
         <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Password Reset</title>
-        </head>
-        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
-            <tr>
-              <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                  <!-- Header -->
-                  <tr>
-                    <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
-                      <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Charmenar Next</h1>
-                      <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0;">Password Reset</p>
-                    </td>
-                  </tr>
-                  
-                  <!-- Body -->
-                  <tr>
-                    <td style="padding: 40px 30px;">
-                      <h2 style="color: #333333; margin: 0 0 20px;">Reset Your Password</h2>
-                      <p style="color: #666666; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
-                        You requested to reset your password. Click the button below to create a new password:
-                      </p>
-                      
-                      <!-- Reset Button -->
-                      <div style="text-align: center; margin: 30px 0;">
-                        <a href="${resetLink}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; display: inline-block;">
-                          Reset Password
-                        </a>
-                      </div>
-                      
-                      <p style="color: #999999; font-size: 14px; line-height: 1.6; margin: 20px 0 0;">
-                        Or copy and paste this link into your browser:
-                      </p>
-                      <p style="color: #667eea; font-size: 12px; word-break: break-all; margin: 10px 0 0;">
-                        ${resetLink}
-                      </p>
-                      
-                      <p style="color: #999999; font-size: 14px; margin: 30px 0 0;">
-                        <strong>This link will expire in 1 hour.</strong>
-                      </p>
-                      
-                      <p style="color: #999999; font-size: 14px; margin: 20px 0 0;">
-                        If you didn't request this, please ignore this email.
-                      </p>
-                    </td>
-                  </tr>
-                  
-                  <!-- Footer -->
-                  <tr>
-                    <td style="background-color: #f8f9fa; padding: 20px 30px; text-align: center; border-top: 1px solid #e9ecef;">
-                      <p style="color: #999999; font-size: 12px; margin: 0;">
-                        © ${new Date().getFullYear()} Charmenar Next. All rights reserved.
-                      </p>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
+        <body style="font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px;">
+          <div style="background: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #667eea;">Charmenar Next</h2>
+            <p>Click the button below to reset your password:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetLink}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 25px; font-weight: bold;">
+                Reset Password
+              </a>
+            </div>
+            <p style="color: #999;">This link expires in 1 hour.</p>
+          </div>
         </body>
         </html>
-      `,
-      text: `
-        Charmenar Next - Password Reset
-        
-        You requested to reset your password. Click the link below:
-        
-        ${resetLink}
-        
-        This link will expire in 1 hour.
-        
-        If you didn't request this, please ignore this email.
-        
-        © ${new Date().getFullYear()} Charmenar Next
       `
     });
 
     console.log('✅ [FORGOT PASSWORD] Reset link sent to:', email);
-
-    res.json({ 
-      success: true, 
-      message: 'If the email exists, a reset link has been sent' 
-    });
+    res.json({ success: true, message: 'Reset link sent to your email' });
 
   } catch (error) {
     console.error('❌ [FORGOT PASSWORD] Error:', error.message);
@@ -412,78 +344,48 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-// POST /api/auth/reset-password - Reset password with token
 router.post('/reset-password', async (req, res) => {
   try {
     const { token, email, newPassword, confirmPassword } = req.body;
     
-    // Validate
     if (!token || !email || !newPassword || !confirmPassword) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'All fields are required' 
-      });
+      return res.status(400).json({ success: false, message: 'All fields required' });
     }
 
     if (newPassword !== confirmPassword) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Passwords do not match' 
-      });
+      return res.status(400).json({ success: false, message: 'Passwords do not match' });
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Password must be at least 6 characters' 
-      });
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
     }
 
-    // Verify token
     const storedToken = resetTokenStore.get(email);
     
     if (!storedToken || storedToken.token !== token) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Invalid reset token' 
-      });
+      return res.status(400).json({ success: false, message: 'Invalid reset token' });
     }
 
-    // Check expiration
     if (Date.now() > storedToken.expiresAt) {
       resetTokenStore.delete(email);
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Reset token has expired. Please request a new one.' 
-      });
+      return res.status(400).json({ success: false, message: 'Token expired' });
     }
 
-    // Find user
     const user = await User.findById(storedToken.userId);
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'User not found' 
-      });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Hash new password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Update password
     user.password = hashedPassword;
     await user.save();
 
-    // Delete used token
     resetTokenStore.delete(email);
 
     console.log('✅ [RESET PASSWORD] Password reset for:', email);
-
-    res.json({ 
-      success: true, 
-      message: 'Password reset successful. Please login with your new password.' 
-    });
+    res.json({ success: true, message: 'Password reset successful' });
 
   } catch (error) {
     console.error('❌ [RESET PASSWORD] Error:', error.message);
@@ -491,7 +393,8 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-// GET /api/auth/me
+// ===== GET USER INFO =====
+
 router.get('/me', async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
