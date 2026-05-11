@@ -141,7 +141,7 @@ const Events = () => {
             {/* ✅ FIXED BIRTHDAY IMAGE */}
             <div className="event-card">
               <img 
-                src="https://images.unsplash.com/photo-1513151241207-1365e4456e7d?w=600" 
+                src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600" 
                 alt="Birthday" 
                 className="event-image"
               />
