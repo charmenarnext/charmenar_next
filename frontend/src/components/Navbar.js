@@ -27,11 +27,16 @@ const Navbar = () => {
   return (
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
-        {/* Logo */}
+        {/* Logo - FIXED PATH */}
         <Link to="/" className="navbar-logo">
-          <img src="/logo.png" alt="Charmenar Next" className="navbar-logo-img" />
+          {/* Use process.env.PUBLIC_URL to fix GitHub Pages path issue */}
+          <img 
+            src={`${process.env.PUBLIC_URL}/logo.png`} 
+            alt="Charmenar Next" 
+            className="navbar-logo-img" 
+          />
           <span className="navbar-logo-text">
-            Charmenar <span className="gradient-text" style={{color: '#D4AF37'}}>Next</span>
+            Charmenar <span style={{ color: '#D4AF37' }}>Next</span>
           </span>
         </Link>
 
@@ -48,7 +53,7 @@ const Navbar = () => {
             <li><Link to="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link></li>
           )}
           
-          {/* Auth Buttons */}
+          {/* Auth Buttons - Premium Design Classes */}
           {isAuthenticated && user ? (
             <>
               <li>
