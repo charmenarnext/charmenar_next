@@ -71,8 +71,8 @@ const ContactUs = () => {
               <div className="contact-details">
                 <h3>Visit Us</h3>
                 <p>
-                  123 Event Plaza, Jubilee Hills<br />
-                  Hyderabad, Telangana 500033<br />
+                  Plot No.533, K7, Vipul Garden Road,<br />
+                  Bhubaneswar,Odisha 751003<br />
                   India
                 </p>
               </div>
@@ -85,8 +85,7 @@ const ContactUs = () => {
               <div className="contact-details">
                 <h3>Call Us</h3>
                 <p>
-                  <a href="tel:+919397685926">+91 9397685926</a><br />
-                  <a href="tel:+919876543210">+91 9876543210</a><br />
+                  <a href="tel:+9124470079">+9124470079</a><br />
                   Mon - Sat: 9:00 AM - 8:00 PM
                 </p>
               </div>
@@ -99,8 +98,7 @@ const ContactUs = () => {
               <div className="contact-details">
                 <h3>Email Us</h3>
                 <p>
-                  <a href="mailto:info@charmenarnext.com">info@charmenarnext.com</a><br />
-                  <a href="mailto:bookings@charmenarnext.com">bookings@charmenarnext.com</a>
+                  <a href="mailto:charmenarnext@gmail.com">charmenarnext@gmail.com</a><br />
                 </p>
               </div>
             </div>
