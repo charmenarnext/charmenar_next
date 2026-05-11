@@ -1,114 +1,152 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FiCalendar, FiUsers, FiAward, FiStar } from 'react-icons/fi';
-import HeroSlider from '../components/HeroSlider';
+import { FiStar, FiClock, FiAward, FiUsers, FiCalendar, FiPhone, FiArrowRight } from 'react-icons/fi';
 import './Home.css';
 
 const Home = () => {
   return (
-    <div className="home">
-      {/* Hero Slider Section */}
-      <HeroSlider />
-
-      {/* Features Section */}
-      <section className="features">
-        <div className="container">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="section-header"
-          >
-            <h2>Why Choose <span className="premium-gradient-text">Charmenar Next</span></h2>
-            <p>Experience excellence in every detail</p>
-          </motion.div>
-
-          <div className="features-grid">
-            {[
-              { icon: FiStar, title: 'Expert Chefs', desc: 'World-class culinary professionals' },
-              { icon: FiAward, title: 'Premium Quality', desc: 'Only the finest ingredients' },
-              { icon: FiCalendar, title: 'Custom Planning', desc: 'Tailored to your vision' },
-              { icon: FiUsers, title: 'Dedicated Team', desc: 'Personalized service guaranteed' }
-            ].map((feature, index) => (
-              <motion.div 
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="feature-card"
-              >
-                <div className="feature-icon">
-                  <feature.icon />
-                </div>
-                <h3>{feature.title}</h3>
-                <p>{feature.desc}</p>
-              </motion.div>
-            ))}
+    <div className="home-page">
+      {/* Hero Section */}
+      <section className="hero">
+        <div className="glow-orb glow-orb-1"></div>
+        <div className="glow-orb glow-orb-2"></div>
+        <div className="glow-orb glow-orb-3"></div>
+        
+        <div className="hero-content">
+          <h1 className="hero-title">
+            Crafting <span>Memorable</span> Events
+          </h1>
+          <div className="hero-divider"></div>
+          <p className="hero-subtitle">
+            Premium Catering & Event Services for Life's Special Moments. From intimate gatherings to grand celebrations, we bring your vision to life with elegance and excellence.
+          </p>
+          <div className="hero-buttons">
+            <Link to="/events" className="hero-btn-primary">
+              Book Your Event <FiArrowRight />
+            </Link>
+            <Link to="/catering" className="hero-btn-secondary">
+              Catering Services
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Services Preview Section */}
-      <section className="services-preview">
+      {/* Features Section */}
+      <section className="features">
         <div className="container">
-          <div className="section-header">
-            <h2>Our Premium Services</h2>
-            <p>Discover what makes us special</p>
+          <h2>
+            Why Choose <span>Charmenar Next</span>?
+          </h2>
+          <p>We deliver exceptional experiences with attention to every detail</p>
+          
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="feature-icon">
+                <FiStar />
+              </div>
+              <h3 className="feature-title">Premium Quality</h3>
+              <p className="feature-description">
+                We use only the finest ingredients and materials to ensure every event meets our high standards of excellence.
+              </p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">
+                <FiClock />
+              </div>
+              <h3 className="feature-title">Timely Delivery</h3>
+              <p className="feature-description">
+                Punctuality is our promise. We ensure every event runs seamlessly on schedule without compromising quality.
+              </p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">
+                <FiAward />
+              </div>
+              <h3 className="feature-title">Expert Team</h3>
+              <p className="feature-description">
+                Our experienced chefs, planners, and coordinators bring decades of combined expertise to your special day.
+              </p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">
+                <FiUsers />
+              </div>
+              <h3 className="feature-title">Personalized Service</h3>
+              <p className="feature-description">
+                Every event is unique. We tailor our services to match your vision, budget, and preferences perfectly.
+              </p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">
+                <FiCalendar />
+              </div>
+              <h3 className="feature-title">Full Planning</h3>
+              <p className="feature-description">
+                From concept to execution, we handle every detail so you can focus on enjoying your special occasion.
+              </p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">
+                <FiPhone />
+              </div>
+              <h3 className="feature-title">24/7 Support</h3>
+              <p className="feature-description">
+                Our dedicated team is always available to assist you, ensuring peace of mind throughout the planning process.
+              </p>
+            </div>
           </div>
+        </div>
+      </section>
 
-          <div className="services-grid">
-            <motion.div 
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="service-item"
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1555244162-803834f70033?w=800&h=600&fit=crop" 
-                alt="Wedding Catering" 
-              />
-              <div className="service-overlay">
-                <h3>Wedding Catering</h3>
-                <p>Make your special day unforgettable</p>
-                <Link to="/catering" className="service-link">Learn More →</Link>
-              </div>
-            </motion.div>
+      {/* About Preview Section */}
+      <section className="about-preview">
+        <div className="container">
+          <div className="about-preview-image">
+            <img 
+              src="https://images.unsplash.com/photo-1555244162-803834f70033?w=800" 
+              alt="About Charmenar Next" 
+            />
+          </div>
+          <div className="about-preview-content">
+            <h2>
+              About <span>Charmenar Next</span>
+            </h2>
+            <p>
+              Founded in 2015, Charmenar Next has grown from a small catering service into one of Hyderabad's most trusted event partners. Our journey is built on passion, authenticity, and an unwavering commitment to excellence.
+            </p>
+            <p>
+              From intimate family gatherings to grand corporate galas, we bring the same level of dedication and creativity to every event we touch. Our team of experienced professionals ensures that every detail is perfect.
+            </p>
+            <Link to="/about" className="btn-primary">
+              Learn More About Us <FiArrowRight />
+            </Link>
+          </div>
+        </div>
+      </section>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="service-item"
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=600&fit=crop" 
-                alt="Corporate Events" 
-              />
-              <div className="service-overlay">
-                <h3>Corporate Events</h3>
-                <p>Impress your clients and team</p>
-                <Link to="/events" className="service-link">Learn More →</Link>
-              </div>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="service-item"
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&h=600&fit=crop" 
-                alt="Private Parties" 
-              />
-              <div className="service-overlay">
-                <h3>Private Parties</h3>
-                <p>Celebrate in style</p>
-                <Link to="/events" className="service-link">Learn More →</Link>
-              </div>
-            </motion.div>
+      {/* Stats Section */}
+      <section className="stats-section">
+        <div className="stats-container">
+          <div className="stat-item">
+            <h3>8+</h3>
+            <p>Years Experience</p>
+          </div>
+          <div className="stat-item">
+            <h3>1,200+</h3>
+            <p>Events Completed</p>
+          </div>
+          <div className="stat-item">
+            <h3>50K+</h3>
+            <p>Happy Clients</p>
+          </div>
+          <div className="stat-item">
+            <h3>100%</h3>
+            <p>Satisfaction Rate</p>
           </div>
         </div>
       </section>
@@ -116,42 +154,63 @@ const Home = () => {
       {/* Testimonials Section */}
       <section className="testimonials">
         <div className="container">
-          <div className="section-header">
-            <h2>What Our Clients Say</h2>
-            <p>Real experiences from real customers</p>
-          </div>
-
+          <h2>
+            What Our <span>Clients Say</span>
+          </h2>
+          <p>Don't just take our word for it - hear from our satisfied clients</p>
+          
           <div className="testimonials-grid">
             <div className="testimonial-card">
-              <div className="testimonial-stars">★★★★★</div>
+              <div className="testimonial-quote">"</div>
               <p className="testimonial-text">
-                "Charmenar Next made our wedding absolutely perfect! The food was exquisite and the service was impeccable."
+                Charmenar Next made our wedding absolutely magical! The food was incredible, the décor was stunning, and their team handled everything flawlessly. Highly recommended!
               </p>
               <div className="testimonial-author">
-                <h4>Sarah & Michael</h4>
-                <span>Wedding Client</span>
+                <img 
+                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" 
+                  alt="Client" 
+                  className="testimonial-avatar"
+                />
+                <div>
+                  <p className="testimonial-name">Priya Sharma</p>
+                  <p className="testimonial-role">Wedding Client</p>
+                </div>
               </div>
             </div>
 
             <div className="testimonial-card">
-              <div className="testimonial-stars">★★★★★</div>
+              <div className="testimonial-quote">"</div>
               <p className="testimonial-text">
-                "Our corporate gala was a huge success thanks to their team. Professional, punctual, and delicious!"
+                We've used Charmenar Next for multiple corporate events and they never disappoint. Professional, punctual, and the food is always outstanding. They're our go-to event partner.
               </p>
               <div className="testimonial-author">
-                <h4>James Thompson</h4>
-                <span>Corporate Event Manager</span>
+                <img 
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" 
+                  alt="Client" 
+                  className="testimonial-avatar"
+                />
+                <div>
+                  <p className="testimonial-name">Rajesh Kumar</p>
+                  <p className="testimonial-role">Corporate Client</p>
+                </div>
               </div>
             </div>
 
             <div className="testimonial-card">
-              <div className="testimonial-stars">★★★★★</div>
+              <div className="testimonial-quote">"</div>
               <p className="testimonial-text">
-                "Best catering service we've ever used. The attention to detail and quality is unmatched."
+                From the initial consultation to the last guest leaving, everything was perfect. The attention to detail and personalized service made our anniversary celebration truly special.
               </p>
               <div className="testimonial-author">
-                <h4>Emily Rodriguez</h4>
-                <span>Birthday Celebration</span>
+                <img 
+                  src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100" 
+                  alt="Client" 
+                  className="testimonial-avatar"
+                />
+                <div>
+                  <p className="testimonial-name">Anita Reddy</p>
+                  <p className="testimonial-role">Anniversary Client</p>
+                </div>
               </div>
             </div>
           </div>
@@ -159,25 +218,22 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="cta-section">
-        <div className="container">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="cta-content"
-          >
-            <h2>Ready to Create Something Amazing?</h2>
-            <p>Let's bring your vision to life with our premium catering and event services</p>
-            <div className="cta-buttons">
-              <Link to="/catering" className="premium-btn">
-                Explore Catering
-              </Link>
-              <Link to="/events" className="premium-btn premium-btn-outline">
-                Plan Your Event
-              </Link>
-            </div>
-          </motion.div>
+      <section className="cta">
+        <div className="cta-content">
+          <h2>
+            Ready to Create Something <span>Amazing?</span>
+          </h2>
+          <p>
+            Let's turn your vision into reality. Contact us today to discuss your next event and discover how Charmenar Next can make it unforgettable.
+          </p>
+          <div className="cta-buttons">
+            <Link to="/contact" className="hero-btn-primary">
+              Get In Touch <FiArrowRight />
+            </Link>
+            <Link to="/events" className="hero-btn-secondary">
+              View Our Packages
+            </Link>
+          </div>
         </div>
       </section>
     </div>
