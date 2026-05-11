@@ -1,3 +1,10 @@
+// ===== REQUIRED IMPORTS - DO NOT REMOVE =====
+const express = require('express');
+const router = express.Router();
+const nodemailer = require('nodemailer');
+// ============================================
+
+// POST /api/events/submit
 router.post('/submit', async (req, res) => {
   try {
     const { name, email, phone, eventType, eventDate, venue, guestCount, budget, message, services } = req.body;
@@ -46,7 +53,7 @@ async function sendEventsEmail(data) {
         pass: process.env.EMAIL_PASS
       },
       tls: { rejectUnauthorized: false },
-      connectionTimeout: 5000 // 5 second timeout
+      connectionTimeout: 5000
     });
 
     await transporter.sendMail({
@@ -77,3 +84,22 @@ async function sendEventsEmail(data) {
     console.error('❌ [EVENTS] Email failed (non-blocking):', error.message);
   }
 }
+
+// GET /api/events/list
+router.get('/list', async (req, res) => {
+  try {
+    const events = [
+      { id: 1, name: 'Grand Wedding Package', category: 'Wedding', price: 50000 },
+      { id: 2, name: 'Corporate Event', category: 'Corporate', price: 30000 },
+      { id: 3, name: 'Birthday Celebration', category: 'Birthday', price: 15000 }
+    ];
+    res.json({ success: true, events });
+  } catch (error) {
+    console.error('❌ [EVENTS] List error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to fetch events' });
+  }
+});
+
+// ===== REQUIRED EXPORT - DO NOT REMOVE =====
+module.exports = router;
+// ============================================

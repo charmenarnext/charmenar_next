@@ -1,3 +1,10 @@
+// ===== REQUIRED IMPORTS - DO NOT REMOVE =====
+const express = require('express');
+const router = express.Router();
+const nodemailer = require('nodemailer');
+// ============================================
+
+// POST /api/catering/submit
 router.post('/submit', async (req, res) => {
   try {
     const { name, email, phone, eventType, eventDate, guestCount, message, services } = req.body;
@@ -74,6 +81,24 @@ async function sendCateringEmail(data) {
     console.log('✅ [CATERING] Email sent successfully');
   } catch (error) {
     console.error('❌ [CATERING] Email failed (non-blocking):', error.message);
-    // Don't throw - we already sent success to user
   }
 }
+
+// GET /api/catering/packages
+router.get('/packages', async (req, res) => {
+  try {
+    const packages = [
+      { id: 1, name: 'Basic Package', price: 500, description: 'Perfect for small gatherings' },
+      { id: 2, name: 'Premium Package', price: 1000, description: 'Ideal for medium events' },
+      { id: 3, name: 'Royal Package', price: 2000, description: 'For grand celebrations' }
+    ];
+    res.json({ success: true, packages });
+  } catch (error) {
+    console.error('❌ [CATERING] Packages error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to fetch packages' });
+  }
+});
+
+// ===== REQUIRED EXPORT - DO NOT REMOVE =====
+module.exports = router;
+// ============================================
