@@ -1,110 +1,43 @@
-const express = require('express');
-const router = express.Router();
-const nodemailer = require('nodemailer');
-
-// POST /api/events/submit
 router.post('/submit', async (req, res) => {
   try {
-    const { 
-      name, 
-      email, 
-      phone, 
-      eventType, 
-      eventDate, 
-      venue, 
-      guestCount, 
-      budget,
-      message,
-      services 
-    } = req.body;
+    const { name, email, phone, eventType, eventDate, venue, guestCount, budget, message, services } = req.body;
 
     console.log('🎉 [EVENTS] New booking request:', { name, email, phone });
 
-    // Validate required fields
-    if (!name || !email || !phone || !eventType || !eventDate || !guestCount) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Please fill in all required fields' 
-      });
+    // 1. Try to send Email (Wrap in try-catch)
+    try {
+      if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+          },
+          tls: { rejectUnauthorized: false }
+        });
+
+        await transporter.sendMail({
+          from: `"Charmenar Next" <${process.env.EMAIL_USER}>`,
+          to: process.env.ADMIN_EMAIL || email,
+          subject: `🎉 New Event Booking - ${eventType}`,
+          html: `<h3>New Booking</h3><p>Name: ${name}</p><p>Email: ${email}</p><p>Phone: ${phone}</p>`
+        });
+        console.log('✅ [EVENTS] Email sent to admin');
+      } else {
+        console.warn('⚠️ [EVENTS] Email credentials missing. Skipping email.');
+      }
+    } catch (emailError) {
+      console.error('❌ [EVENTS] Email sending failed:', emailError.message);
     }
 
-    // Send email notification to admin
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      },
-      tls: { rejectUnauthorized: false }
-    });
-
-    await transporter.sendMail({
-      from: `"Charmenar Next" <${process.env.EMAIL_USER}>`,
-      to: process.env.ADMIN_EMAIL || 'charmenarnext@gmail.com',
-      subject: `🎉 New Event Booking - ${eventType}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4;">
-          <div style="background: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #764ba2;">New Event Booking Request</h2>
-            
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-              <tr style="background: #f8f9fa;">
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Name</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${name}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Email</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${email}</td>
-              </tr>
-              <tr style="background: #f8f9fa;">
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Phone</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${phone}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Event Type</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${eventType}</td>
-              </tr>
-              <tr style="background: #f8f9fa;">
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Event Date</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${eventDate}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Venue</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${venue || 'Not specified'}</td>
-              </tr>
-              <tr style="background: #f8f9fa;">
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Guest Count</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${guestCount}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Budget</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${budget || 'Not specified'}</td>
-              </tr>
-              <tr style="background: #f8f9fa;">
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Services</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${services || 'Not specified'}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Message</td>
-                <td style="padding: 12px; border: 1px solid #dee2e6;">${message || 'No message'}</td>
-              </tr>
-            </table>
-            
-            <p style="color: #999; font-size: 12px;">Received on ${new Date().toLocaleString()}</p>
-          </div>
-        </div>
-      `
-    });
-
-    console.log('✅ [EVENTS] Booking email sent to admin');
-
+    // 2. Send Success Response
     res.json({
       success: true,
-      message: 'Thank you! Your event booking request has been submitted. Our team will contact you within 24 hours.'
+      message: 'Thank you! Your booking request has been submitted. We will contact you soon.'
     });
 
   } catch (error) {
-    console.error('❌ [EVENTS] Error:', error.message);
+    console.error('❌ [EVENTS] Critical Error:', error.message);
     res.status(500).json({ 
       success: false, 
       message: 'Failed to submit booking. Please try again.',
@@ -112,43 +45,3 @@ router.post('/submit', async (req, res) => {
     });
   }
 });
-
-// GET /api/events/list
-router.get('/list', async (req, res) => {
-  try {
-    // Sample events - replace with database query
-    const events = [
-      {
-        id: 1,
-        name: 'Grand Wedding Package',
-        category: 'Wedding',
-        price: 50000,
-        description: 'Complete wedding planning and execution',
-        image: 'wedding.jpg'
-      },
-      {
-        id: 2,
-        name: 'Corporate Event',
-        category: 'Corporate',
-        price: 30000,
-        description: 'Professional corporate event management',
-        image: 'corporate.jpg'
-      },
-      {
-        id: 3,
-        name: 'Birthday Celebration',
-        category: 'Birthday',
-        price: 15000,
-        description: 'Memorable birthday party planning',
-        image: 'birthday.jpg'
-      }
-    ];
-
-    res.json({ success: true, events });
-  } catch (error) {
-    console.error('❌ [EVENTS] List error:', error.message);
-    res.status(500).json({ success: false, message: 'Failed to fetch events' });
-  }
-});
-
-module.exports = router;
