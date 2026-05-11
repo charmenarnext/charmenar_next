@@ -1,56 +1,36 @@
 /* ===== PAGE BACKGROUND - MATCHES LOGIN/REGISTER ===== */
-/* ===== PAGE HEADER - PREMIUM DARK THEME ===== */
-.page-header {
-  background: linear-gradient(135deg, rgba(15, 28, 38, 0.9) 0%, rgba(26, 47, 63, 0.9) 100%);
-  padding: 100px 30px;
-  text-align: center;
-  color: white;
-  margin-bottom: 60px;
-  position: relative;
-  overflow: hidden;
-  border-bottom: 3px solid #D4AF37; /* Gold accent line */
+.catering-page {
+  padding-top: 80px;
+  min-height: 100vh;
+  /* Same Dark Teal Navy Gradient */
+  background: linear-gradient(135deg, #0f1c26 0%, #1a2f3f 100%);
 }
 
-/* Subtle decorative pattern */
-.page-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 50%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
-  pointer-events: none;
+/* ===== PAGE HEADER ===== */
+.page-header {
+  background: transparent; /* Transparent to show gradient */
+  padding: 60px 30px;
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
 }
 
 .page-header h1 {
-  font-size: 3.5rem;
-  margin-bottom: 20px;
+  font-size: 2.8rem;
+  margin-bottom: 15px;
   font-family: 'Playfair Display', serif;
   color: white;
-  position: relative;
-  z-index: 1;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .page-header h1 span {
-  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 700;
+  color: #D4AF37; /* Gold accent */
 }
 
 .page-header p {
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
   max-width: 600px;
   margin: 0 auto;
-  position: relative;
-  z-index: 1;
-  line-height: 1.6;
 }
 
 /* ===== MENU SECTION ===== */
