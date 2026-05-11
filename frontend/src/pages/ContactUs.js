@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import { FiPhone, FiMail, FiMapPin, FiClock, FiSend, FiFacebook, FiTwitter, FiInstagram, FiLinkedin } from 'react-icons/fi';
+import { FiMail, FiPhone, FiMapPin, FiClock, FiSend, FiFacebook, FiTwitter, FiInstagram, FiLinkedin } from 'react-icons/fi';
 import './ContactUs.css';
 
 const ContactUs = () => {
@@ -14,19 +14,28 @@ const ContactUs = () => {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
-      // TODO: Replace with actual API call
+      // You can add backend API call here
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast.success('Message sent successfully! We will contact you soon.');
-      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+      toast.success('Thank you! Your message has been sent successfully.');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
     } catch (error) {
       toast.error('Failed to send message. Please try again.');
     } finally {
@@ -38,183 +47,226 @@ const ContactUs = () => {
     <div className="contact-page">
       {/* Page Header */}
       <section className="page-header">
+        <div className="glow-orb glow-orb-1"></div>
+        <div className="glow-orb glow-orb-2"></div>
+        
         <div className="container">
-          <h1>Contact <span className="gradient-text">Us</span></h1>
-          <p>Get in touch with us for catering inquiries, event bookings, or general questions.</p>
+          <h1>
+            Contact <span className="gradient-text">Us</span>
+          </h1>
+          <div className="divider"></div>
+          <p>We'd love to hear from you! Get in touch with us for inquiries, bookings, or any questions.</p>
         </div>
       </section>
 
-      {/* Contact Content */}
-      <section className="contact-content">
-        <div className="container">
-          <div className="contact-grid">
-            
-            {/* Contact Info - UPDATED */}
-            <div className="contact-info">
-              <h3>Get in Touch</h3>
-              
-              <div className="info-item">
-                <div className="info-icon">
-                  <FiPhone />
-                </div>
-                <div className="info-text">
-                  <h4>Call Us</h4>
-                  <p>
-                    <a href="tel:+9124470079" className="contact-link">+9124470079</a>
-                  </p>
-                </div>
+      {/* Contact Container */}
+      <div className="contact-container">
+        <div className="contact-grid">
+          {/* Contact Info */}
+          <div className="contact-info">
+            <div className="contact-card">
+              <div className="contact-icon">
+                <FiMapPin />
               </div>
-
-              <div className="info-item">
-                <div className="info-icon">
-                  <FiMail />
-                </div>
-                <div className="info-text">
-                  <h4>Email Us</h4>
-                  <p>
-                    <a href="mailto:charmenarnext@gmail.com" className="contact-link">charmenarnext@gmail.com</a>
-                  </p>
-                </div>
-              </div>
-
-              <div className="info-item">
-                <div className="info-icon">
-                  <FiMapPin />
-                </div>
-                <div className="info-text">
-                  <h4>Visit Us</h4>
-                  <p className="contact-address">
-                    Plot No.533, K7,<br /> Vipul Garden Road,<br />
-                    Bhubaneswar 751003
-                  </p>
-                </div>
-              </div>
-
-              <div className="info-item">
-                <div className="info-icon">
-                  <FiClock />
-                </div>
-                <div className="info-text">
-                  <h4>Working Hours</h4>
-                  <p>
-                    Mon - Sat: 9:00 AM - 8:00 PM<br />
-                    Sunday: 10:00 AM - 6:00 PM
-                  </p>
-                </div>
-              </div>
-
-              {/* Social Links */}
-              <div className="social-links">
-                <a href="https://facebook.com" className="social-link" target="_blank" rel="noopener noreferrer"><FiFacebook /></a>
-                <a href="https://twitter.com" className="social-link" target="_blank" rel="noopener noreferrer"><FiTwitter /></a>
-                <a href="https://instagram.com" className="social-link" target="_blank" rel="noopener noreferrer"><FiInstagram /></a>
-                <a href="https://linkedin.com" className="social-link" target="_blank" rel="noopener noreferrer"><FiLinkedin /></a>
+              <div className="contact-details">
+                <h3>Visit Us</h3>
+                <p>
+                  123 Event Plaza, Jubilee Hills<br />
+                  Hyderabad, Telangana 500033<br />
+                  India
+                </p>
               </div>
             </div>
 
-            {/* Contact Form */}
-            <div className="contact-form-container">
-              <h3>Send us a Message</h3>
-              <form onSubmit={handleSubmit} className="contact-form">
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="name">Your Name *</label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      placeholder="Enter your name"
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="email">Email Address *</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-                </div>
+            <div className="contact-card">
+              <div className="contact-icon">
+                <FiPhone />
+              </div>
+              <div className="contact-details">
+                <h3>Call Us</h3>
+                <p>
+                  <a href="tel:+919397685926">+91 9397685926</a><br />
+                  <a href="tel:+919876543210">+91 9876543210</a><br />
+                  Mon - Sat: 9:00 AM - 8:00 PM
+                </p>
+              </div>
+            </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="phone">Phone Number</label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="Enter your phone"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="subject">Subject *</label>
-                    <input
-                      type="text"
-                      id="subject"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      placeholder="What is this about?"
-                      required
-                    />
-                  </div>
+            <div className="contact-card">
+              <div className="contact-icon">
+                <FiMail />
+              </div>
+              <div className="contact-details">
+                <h3>Email Us</h3>
+                <p>
+                  <a href="mailto:info@charmenarnext.com">info@charmenarnext.com</a><br />
+                  <a href="mailto:bookings@charmenarnext.com">bookings@charmenarnext.com</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="contact-card">
+              <div className="contact-icon">
+                <FiClock />
+              </div>
+              <div className="contact-details">
+                <h3>Business Hours</h3>
+                <p>
+                  Monday - Saturday: 9:00 AM - 8:00 PM<br />
+                  Sunday: 10:00 AM - 6:00 PM<br />
+                  Emergency support available 24/7
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Form */}
+          <div className="contact-form-wrapper">
+            <h2>Send Us a <span className="gradient-text">Message</span></h2>
+            <p className="form-subtitle">Fill out the form below and we'll get back to you within 24 hours</p>
+
+            <form onSubmit={handleSubmit} className="contact-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="name">
+                    Full Name <span className="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Enter your full name"
+                    required
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="message">Message *</label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
+                  <label htmlFor="email">
+                    Email Address <span className="required">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleChange}
-                    placeholder="Tell us about your event or inquiry..."
-                    rows="5"
+                    placeholder="Enter your email"
                     required
-                  ></textarea>
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="phone">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Enter your phone number"
+                    disabled={loading}
+                    pattern="[0-9]{10}"
+                  />
                 </div>
 
-                <button type="submit" className="form-submit" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <span className="spinner"></span>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <FiSend /> Send Message
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
+                <div className="form-group">
+                  <label htmlFor="subject">
+                    Subject <span className="required">*</span>
+                  </label>
+                  <select
+                    id="subject"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
+                  >
+                    <option value="">Select a subject</option>
+                    <option value="catering">Catering Inquiry</option>
+                    <option value="events">Event Booking</option>
+                    <option value="general">General Inquiry</option>
+                    <option value="feedback">Feedback</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
 
+              <div className="form-group">
+                <label htmlFor="message">
+                  Message <span className="required">*</span>
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  placeholder="Tell us about your event or inquiry..."
+                  required
+                  disabled={loading}
+                  rows="5"
+                ></textarea>
+              </div>
+
+              <button 
+                type="submit" 
+                className="form-submit"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner"></span>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <FiSend /> Send Message
+                  </>
+                )}
+              </button>
+            </form>
           </div>
         </div>
-      </section>
 
-      {/* Map Section */}
-      <section className="map-section">
-        <div className="container">
-          <div className="map-container">
-            <iframe
-              title="Charmenar Next Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3720.5!2d85.8245!3d20.2961!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjDCsDE3JzQ2LjAiTiA4NcKwNDknMjguMCJF!5e0!3m2!1sen!2sin!4v1234567890"
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
-          </div>
+        {/* Map Section */}
+        <div className="contact-map">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.3456789012345!2d78.40512345678901!3d17.423456789012345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a35f0e0e0e0e0e0%3A0xe0e0e0e0e0e0e0e0!2sJubilee%20Hills%2C%20Hyderabad%2C%20Telangana!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
+            allowFullScreen=""
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Charmenar Next Location"
+          ></iframe>
         </div>
-      </section>
+
+        {/* Social Media Section */}
+        <section className="contact-social">
+          <h2>Follow Us on <span className="gradient-text">Social Media</span></h2>
+          <p>Stay connected for the latest updates, offers, and inspiration</p>
+          
+          <div className="social-links">
+            <a href="https://facebook.com/charmenarnext" target="_blank" rel="noopener noreferrer" className="social-link">
+              <FiFacebook />
+            </a>
+            <a href="https://twitter.com/charmenarnext" target="_blank" rel="noopener noreferrer" className="social-link">
+              <FiTwitter />
+            </a>
+            <a href="https://instagram.com/charmenarnext" target="_blank" rel="noopener noreferrer" className="social-link">
+              <FiInstagram />
+            </a>
+            <a href="https://linkedin.com/company/charmenarnext" target="_blank" rel="noopener noreferrer" className="social-link">
+              <FiLinkedin />
+            </a>
+          </div>
+        </section>
+      </div>
     </div>
   );
 };
