@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { FiMail, FiLock, FiShield, FiArrowRight } from 'react-icons/fi';
+import { FiMail, FiLock, FiShield, FiRefreshCw } from 'react-icons/fi';
 import './AdminLogin.css';
 
 const AdminLogin = () => {
@@ -10,61 +10,65 @@ const AdminLogin = () => {
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(0);
   
-  const { adminLogin, sendAdminOTP } = useAuth();
+  const { sendAdminOTP, verifyAdminOTP } = useAuth();
   const navigate = useNavigate();
 
-  // Handle OTP Request
   const handleRequestOTP = async (e) => {
     e.preventDefault();
+    if (!email) return toast.error('Please enter admin email');
     
-    console.log('🔐 Requesting OTP for:', email);
-    
-    if (!email || !email.includes('@')) {
-      toast.error('Please enter a valid email address');
-      return;
-    }
-
     setLoading(true);
-    
     try {
-      console.log('📤 Calling sendAdminOTP...');
       await sendAdminOTP(email);
-      console.log('✅ OTP sent successfully');
-      toast.success('OTP sent to your email!');
+      toast.success('OTP sent to your email');
       setStep(2);
+      setTimer(60);
+      const interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) clearInterval(interval);
+          return prev - 1;
+        });
+      }, 1000);
     } catch (error) {
-      console.error('❌ OTP Request Error:', error);
-      console.error('Response:', error.response);
-      
-      const errorMessage = error.response?.data?.message || 
-                          error.message || 
-                          'Failed to send OTP. Please try again.';
-      
-      toast.error(errorMessage);
+      toast.error(error.message || 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle OTP Verification
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
+    if (!otp || otp.length !== 6) return toast.error('Please enter valid 6-digit OTP');
     
-    if (!otp || otp.length !== 6) {
-      toast.error('Please enter a valid 6-digit OTP');
-      return;
-    }
-
     setLoading(true);
-    
     try {
-      await adminLogin(email, otp);
-      toast.success('Login successful!');
+      await verifyAdminOTP(email, otp);
+      toast.success('Welcome back, Admin!');
       navigate('/admin/dashboard');
     } catch (error) {
-      console.error('❌ Login Error:', error);
-      toast.error(error.response?.data?.message || 'Invalid OTP');
+      toast.error(error.message || 'Invalid OTP');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (timer > 0) return;
+    setLoading(true);
+    try {
+      await sendAdminOTP(email);
+      toast.success('OTP resent!');
+      setTimer(60);
+      const interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) clearInterval(interval);
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      toast.error('Failed to resend OTP');
     } finally {
       setLoading(false);
     }
@@ -74,116 +78,36 @@ const AdminLogin = () => {
     <div className="admin-login-page">
       <div className="admin-login-container">
         <div className="admin-login-card">
-          <div className="admin-login-header">
-            <div className="admin-logo">
-              <FiShield size={48} />
-            </div>
-            <h1>Admin Portal</h1>
-            <p>Charmenar Next</p>
+          <div className="admin-header">
+            <FiShield className="admin-icon" />
+            <h1>Admin <span className="gradient-text">Portal</span></h1>
+            <p>Secure access for administrators only</p>
           </div>
 
-          {step === 1 && (
-            <form onSubmit={handleRequestOTP} className="admin-login-form">
+          {step === 1 ? (
+            <form onSubmit={handleRequestOTP} className="admin-form">
               <div className="form-group">
-                <label htmlFor="email">
-                  <FiMail /> Admin Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@charmenarnext.com"
-                  required
-                  disabled={loading}
-                />
+                <label><FiMail /> Admin Email</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@charmenar.com" required />
               </div>
-
-              <button 
-                type="submit" 
-                className="submit-btn"
-                disabled={loading || !email}
-              >
-                {loading ? (
-                  <>
-                    <span className="spinner"></span>
-                    Sending OTP...
-                  </>
-                ) : (
-                  <>
-                    Request OTP
-                    <FiArrowRight />
-                  </>
-                )}
+              <button type="submit" className="admin-btn" disabled={loading}>
+                {loading ? 'Sending OTP...' : 'Get OTP'}
               </button>
-
-              <div className="login-footer">
-                <Link to="/" className="back-link">← Back to Home</Link>
-              </div>
             </form>
-          )}
-
-          {step === 2 && (
-            <form onSubmit={handleVerifyOTP} className="admin-login-form">
-              <div className="form-group">
-                <label htmlFor="otp">
-                  <FiLock /> Enter OTP
-                </label>
-                <input
-                  type="text"
-                  id="otp"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="Enter 6-digit OTP"
-                  maxLength="6"
-                  required
-                  disabled={loading}
-                  className="otp-input"
-                />
-              </div>
-
+          ) : (
+            <form onSubmit={handleVerifyOTP} className="admin-form">
               <div className="otp-info">
                 <p>OTP sent to <strong>{email}</strong></p>
-                <button 
-                  type="button" 
-                  className="resend-btn" 
-                  onClick={handleRequestOTP}
-                  disabled={loading}
-                >
-                  Resend OTP
-                </button>
+                {timer > 0 ? <p className="timer">Resend in {timer}s</p> : <button type="button" className="resend-link" onClick={handleResendOTP}><FiRefreshCw /> Resend</button>}
               </div>
-
-              <button 
-                type="submit" 
-                className="submit-btn"
-                disabled={loading || otp.length !== 6}
-              >
-                {loading ? (
-                  <>
-                    <span className="spinner"></span>
-                    Verifying...
-                  </>
-                ) : (
-                  <>
-                    Verify & Login
-                    <FiArrowRight />
-                  </>
-                )}
+              <div className="form-group">
+                <label><FiLock /> Enter OTP</label>
+                <input type="text" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="123456" maxLength="6" className="otp-input" required />
+              </div>
+              <button type="submit" className="admin-btn" disabled={loading}>
+                {loading ? 'Verifying...' : 'Verify & Login'}
               </button>
-
-              <div className="login-footer">
-                <button 
-                  type="button" 
-                  className="back-link" 
-                  onClick={() => {
-                    setStep(1);
-                    setOtp('');
-                  }}
-                >
-                  ← Change Email
-                </button>
-              </div>
+              <button type="button" className="back-link" onClick={() => { setStep(1); setOtp(''); }}>Back</button>
             </form>
           )}
         </div>
