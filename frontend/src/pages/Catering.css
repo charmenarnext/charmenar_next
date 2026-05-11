@@ -7,30 +7,224 @@
 }
 
 /* ===== PAGE HEADER ===== */
+/* ===== PREMIUM HEADER - DARK THEME WITH GOLD ===== */
 .page-header {
-  background: transparent; /* Transparent to show gradient */
-  padding: 60px 30px;
+  background: linear-gradient(135deg, #0f1c26 0%, #1a2f3f 50%, #2d4a5f 100%);
+  padding: 100px 30px;
   text-align: center;
   color: white;
-  margin-bottom: 30px;
+  margin-bottom: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Gold accent line at top */
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent 0%, #D4AF37 50%, transparent 100%);
+}
+
+/* Gold accent line at bottom */
+.page-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #D4AF37 50%, transparent 100%);
+}
+
+/* Decorative glowing orbs */
+.page-header .glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.page-header .glow-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: #D4AF37;
+  top: -200px;
+  right: -100px;
+}
+
+.page-header .glow-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: #764ba2;
+  bottom: -150px;
+  left: -100px;
+}
+
+.page-header .glow-orb-3 {
+  width: 200px;
+  height: 200px;
+  background: #667eea;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .page-header h1 {
-  font-size: 2.8rem;
-  margin-bottom: 15px;
+  font-size: 4rem;
+  margin-bottom: 20px;
   font-family: 'Playfair Display', serif;
   color: white;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  letter-spacing: 2px;
 }
 
 .page-header h1 span {
-  color: #D4AF37; /* Gold accent */
+  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 50%, #D4AF37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  position: relative;
+}
+
+/* Decorative divider */
+.page-header .divider {
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #D4AF37, transparent);
+  margin: 20px auto;
+  position: relative;
+  z-index: 1;
+}
+
+.page-header .divider::before {
+  content: '◆';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #D4AF37;
+  font-size: 12px;
+  background: #0f1c26;
+  padding: 0 10px;
 }
 
 .page-header p {
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.8);
-  max-width: 600px;
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 650px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  line-height: 1.8;
+  font-weight: 300;
+}
+
+/* ===== LAPTOP RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .page-header {
+    padding: 80px 30px;
+  }
+
+  .page-header h1 {
+    font-size: 3.5rem;
+  }
+
+  .page-header .glow-orb-1 {
+    width: 300px;
+    height: 300px;
+  }
+
+  .page-header .glow-orb-2 {
+    width: 250px;
+    height: 250px;
+  }
+}
+
+/* ===== TABLET RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .page-header {
+    padding: 70px 20px;
+    margin-bottom: 40px;
+  }
+
+  .page-header h1 {
+    font-size: 2.8rem;
+    letter-spacing: 1px;
+  }
+
+  .page-header p {
+    font-size: 1.1rem;
+    padding: 0 10px;
+  }
+
+  .page-header .glow-orb-1 {
+    width: 200px;
+    height: 200px;
+    top: -100px;
+    right: -50px;
+  }
+
+  .page-header .glow-orb-2 {
+    width: 200px;
+    height: 200px;
+    bottom: -100px;
+    left: -50px;
+  }
+
+  .page-header .glow-orb-3 {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .page-header {
+    padding: 60px 15px;
+    margin-bottom: 30px;
+  }
+
+  .page-header h1 {
+    font-size: 2.2rem;
+    letter-spacing: 0.5px;
+  }
+
+  .page-header p {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .page-header .divider {
+    width: 80px;
+    margin: 15px auto;
+  }
+
+  .page-header .glow-orb {
+    opacity: 0.1;
+  }
+
+  .page-header .glow-orb-1 {
+    width: 150px;
+    height: 150px;
+  }
+
+  .page-header .glow-orb-2 {
+    width: 150px;
+    height: 150px;
+  }
+
+  .page-header .glow-orb-3 {
+    width: 100px;
+    height: 100px;
+  }
 }
 
 /* ===== MENU SECTION ===== */
