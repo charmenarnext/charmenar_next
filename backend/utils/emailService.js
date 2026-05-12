@@ -1,116 +1,106 @@
-const nodemailer = require('nodemailer');
-require('dotenv').config();
+const sgMail = require('@sendgrid/mail');
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    // ✅ Uses your EMAIL_USER and EMAIL_PASS from .env
-    user: process.env.EMAIL_USER || 'charmenarnext@gmail.com',
-    pass: process.env.EMAIL_PASS // Required for emails to work
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
+
+const sendAdminNotification = async (type, data) => {
+  try {
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'charmenarnext@gmail.com';
+    const fromName = process.env.SENDGRID_FROM_NAME || 'Charmenar Next';
+    const adminEmail = process.env.ADMIN_EMAIL || 'charmenarnext@gmail.com';
+
+    let subject, html;
+
+    switch (type) {
+      case 'catering':
+        subject = `🍽️ New Catering Inquiry - ${data.eventType}`;
+        html = `
+          <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+              <h2 style="color: #667eea; text-align: center;">New Catering Inquiry</h2>
+              <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Name</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.name}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Email</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.email}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.phone}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Event Type</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.eventType}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Event Date</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${new Date(data.eventDate).toLocaleDateString()}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Guest Count</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.guestCount}</td></tr>
+                ${data.services ? `<tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Services</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.services}</td></tr>` : ''}
+                ${data.message ? `<tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Message</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.message}</td></tr>` : ''}
+              </table>
+              <p style="text-align: center; color: #999; font-size: 12px;">Received: ${new Date().toLocaleString()}</p>
+            </div>
+          </div>
+        `;
+        break;
+
+      case 'event':
+        subject = `🎉 New Event Booking - ${data.eventType}`;
+        html = `
+          <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+              <h2 style="color: #764ba2; text-align: center;">New Event Booking</h2>
+              <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Name</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.name}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Email</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.email}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.phone}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Event Type</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.eventType}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Event Date</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${new Date(data.eventDate).toLocaleDateString()}</td></tr>
+                ${data.venue ? `<tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Venue</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.venue}</td></tr>` : ''}
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Guest Count</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.guestCount}</td></tr>
+                ${data.budget ? `<tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Budget</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.budget}</td></tr>` : ''}
+                ${data.services ? `<tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Services</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.services}</td></tr>` : ''}
+                ${data.message ? `<tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Message</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.message}</td></tr>` : ''}
+              </table>
+              <p style="text-align: center; color: #999; font-size: 12px;">Received: ${new Date().toLocaleString()}</p>
+            </div>
+          </div>
+        `;
+        break;
+
+      case 'contact':
+        subject = `📬 New Contact Message - ${data.subject}`;
+        html = `
+          <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+              <h2 style="color: #667eea; text-align: center;">New Contact Message</h2>
+              <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Name</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.name}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Email</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.email}</td></tr>
+                ${data.phone ? `<tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Phone</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.phone}</td></tr>` : ''}
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Subject</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.subject}</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Message</strong></td><td style="padding: 10px; border-bottom: 1px solid #eee;">${data.message}</td></tr>
+              </table>
+              <p style="text-align: center; color: #999; font-size: 12px;">Received: ${new Date().toLocaleString()}</p>
+            </div>
+          </div>
+        `;
+        break;
+
+      default:
+        return;
+    }
+
+    const msg = {
+      to: adminEmail,
+      from: { email: fromEmail, name: fromName },
+      subject,
+      html,
+      text: subject // Fallback plain text
+    };
+
+    await sgMail.send(msg);
+    console.log(`✅ Email sent to admin: ${subject}`);
+    return true;
+
+  } catch (error) {
+    console.error('❌ Failed to send admin email:', error.message);
+    if (error.response) {
+      console.error('SendGrid error body:', error.response.body);
+    }
+    return false;
   }
-});
-
-const sendAdminNotification = async (eventData, userData) => {
-  // Skip in dev if no EMAIL_PASS (prevents crashes)
-  if (!process.env.EMAIL_PASS && process.env.NODE_ENV !== 'production') {
-    console.log('📧 [DEV] Email notification skipped:', {
-      to: process.env.EMAIL_USER || 'charmenarnext@gmail.com',
-      event: eventData.eventName,
-      customer: userData.name
-    });
-    return { messageId: 'dev-mode' };
-  }
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER || 'charmenarnext@gmail.com',
-    to: 'charmenarnext@gmail.com',
-    subject: `New ${eventData.eventType} Booking - ${eventData.eventName}`,
-    html: `
-      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px;">
-        <div style="background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
-          <h1 style="color: #667eea; text-align: center; margin-bottom: 30px; font-size: 28px;">✨ New Event Booking</h1>
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-            <h2 style="color: #333; margin-top: 0;">Event Details</h2>
-            <p><strong>Type:</strong> ${eventData.eventType}</p>
-            <p><strong>Name:</strong> ${eventData.eventName}</p>
-            <p><strong>Date:</strong> ${new Date(eventData.eventDate).toLocaleDateString()}</p>
-            <p><strong>Guests:</strong> ${eventData.numberOfGuests}</p>
-          </div>
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
-            <h2 style="color: #333; margin-top: 0;">Customer</h2>
-            <p><strong>Name:</strong> ${userData.name}</p>
-            <p><strong>Email:</strong> ${userData.email}</p>
-            <p><strong>Phone:</strong> ${userData.phone}</p>
-          </div>
-          <div style="text-align: center; margin-top: 30px;">
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:3003'}/admin/dashboard" 
-               style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 30px; font-weight: bold;">
-              View in Admin Panel
-            </a>
-          </div>
-        </div>
-      </div>
-    `
-  };
-
-  return await transporter.sendMail(mailOptions);
 };
 
-const sendAdminLoginOTP = async (email, otp) => {
-  if (!process.env.EMAIL_PASS && process.env.NODE_ENV !== 'production') {
-    console.log(`🔐 [DEV] Admin OTP: ${otp}`);
-    return { messageId: 'dev-mode' };
-  }
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER || 'charmenarnext@gmail.com',
-    to: email,
-    subject: 'Charmenar Next - Admin Login OTP',
-    html: `
-      <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-        <div style="background: white; border-radius: 15px; padding: 40px 30px; text-align: center;">
-          <h1 style="color: #667eea;">Admin Login</h1>
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 48px; font-weight: bold; padding: 20px 40px; border-radius: 10px; margin: 20px 0; letter-spacing: 5px;">
-            ${otp}
-          </div>
-          <p style="color: #999;">Valid for 10 minutes</p>
-        </div>
-      </div>
-    `
-  };
-
-  return await transporter.sendMail(mailOptions);
-};
-
-const sendWelcomeEmail = async (email, name) => {
-  if (!process.env.EMAIL_PASS && process.env.NODE_ENV !== 'production') {
-    console.log(`👋 [DEV] Welcome email to: ${email}`);
-    return { messageId: 'dev-mode' };
-  }
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER || 'charmenarnext@gmail.com',
-    to: email,
-    subject: 'Welcome to Charmenar Next!',
-    html: `
-      <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-        <div style="background: white; border-radius: 15px; padding: 40px 30px; text-align: center;">
-          <h1 style="color: #667eea;">Welcome to Charmenar Next! 🎉</h1>
-          <p style="color: #555; font-size: 18px;">Dear ${name},<br>Thank you for registering!</p>
-          <a href="${process.env.FRONTEND_URL || 'http://localhost:3003'}/catering-events" 
-             style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 30px; margin-top: 20px;">
-            Book Now
-          </a>
-        </div>
-      </div>
-    `
-  };
-
-  return await transporter.sendMail(mailOptions);
-};
-
-module.exports = {
-  sendAdminNotification,
-  sendAdminLoginOTP,
-  sendWelcomeEmail
-};
+module.exports = { sendAdminNotification };

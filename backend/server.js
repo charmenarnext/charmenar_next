@@ -1,8 +1,10 @@
+const cateringRoutes = require('./routes/catering');
+const eventsRoutes = require('./routes/events');
+const contactRoutes = require('./routes/contact');
+const adminRoutes = require('./routes/admin');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const cateringRoutes = require('./routes/catering');
-const eventsRoutes = require('./routes/events');
 require('dotenv').config();
 
 const app = express();
@@ -71,9 +73,13 @@ console.log('');
 
 app.use('/api/catering', cateringRoutes);
 app.use('/api/events', eventsRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/admin', adminRoutes);
 
 console.log('✅ Catering routes registered');
 console.log('✅ Events routes registered');
+console.log('✅ Contact routes registered');
+console.log('✅ Admin routes registered');
 // Events routes
 try {
   const eventsRoutes = require('./routes/events');

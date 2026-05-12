@@ -1,35 +1,48 @@
-// ===== REQUIRED IMPORTS - DO NOT REMOVE =====
 const express = require('express');
 const router = express.Router();
-const nodemailer = require('nodemailer');
-// ============================================
+const CateringInquiry = require('../models/CateringInquiry');
+const { sendAdminNotification } = require('../utils/emailService');
 
 // POST /api/catering/submit
 router.post('/submit', async (req, res) => {
   try {
     const { name, email, phone, eventType, eventDate, guestCount, message, services } = req.body;
 
-    console.log('🍽️ [CATERING] New inquiry received:', { name, email, phone });
+    console.log('🍽️ [CATERING] New inquiry:', { name, email, phone });
 
-    // Validate required fields
+    // Validate
     if (!name || !email || !phone || !eventType || !eventDate || !guestCount) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Please fill in all required fields' 
-      });
+      return res.status(400).json({ success: false, message: 'Please fill in all required fields' });
     }
 
-    // ✅ Send response to user IMMEDIATELY (don't wait for email)
-    res.json({
-      success: true,
-      message: 'Thank you! Your inquiry has been submitted. We will contact you soon.'
+    // Save to database
+    const inquiry = new CateringInquiry({
+      name,
+      email,
+      phone,
+      eventType,
+      eventDate,
+      guestCount,
+      message: message || '',
+      services: services || ''
     });
 
-    // 🔥 Send email in background (non-blocking)
-    sendCateringEmail({ name, email, phone, eventType, eventDate, guestCount, message, services });
+    await inquiry.save();
+    console.log('✅ [CATERING] Saved to database:', inquiry._id);
+
+    // Send email to admin (non-blocking)
+    sendAdminNotification('catering', { ...inquiry.toObject(), eventDate: inquiry.eventDate.toISOString() })
+      .then(() => console.log('✅ [CATERING] Admin email sent'))
+      .catch(err => console.error('❌ [CATERING] Email failed:', err.message));
+
+    res.json({
+      success: true,
+      message: 'Thank you! Your inquiry has been submitted. We will contact you within 24 hours.',
+      inquiryId: inquiry._id
+    });
 
   } catch (error) {
-    console.error('❌ [CATERING] Critical Error:', error.message);
+    console.error('❌ [CATERING] Error:', error.message);
     res.status(500).json({ 
       success: false, 
       message: 'Failed to submit inquiry. Please try again.',
@@ -38,53 +51,7 @@ router.post('/submit', async (req, res) => {
   }
 });
 
-// Helper function to send email (non-blocking)
-async function sendCateringEmail(data) {
-  try {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.warn('⚠️ [CATERING] Email credentials missing');
-      return;
-    }
-
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      },
-      tls: { rejectUnauthorized: false },
-      connectionTimeout: 5000 // 5 second timeout
-    });
-
-    await transporter.sendMail({
-      from: `"Charmenar Next" <${process.env.EMAIL_USER}>`,
-      to: process.env.ADMIN_EMAIL || data.email,
-      subject: `🍽️ New Catering Inquiry - ${data.eventType}`,
-      html: `
-        <div style="font-family: Arial; padding: 20px; background: #f4f4f4;">
-          <div style="background: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #667eea;">New Catering Inquiry</h2>
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-              <tr style="background: #f8f9fa;"><td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Name</td><td style="padding: 12px; border: 1px solid #dee2e6;">${data.name}</td></tr>
-              <tr><td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Email</td><td style="padding: 12px; border: 1px solid #dee2e6;">${data.email}</td></tr>
-              <tr style="background: #f8f9fa;"><td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Phone</td><td style="padding: 12px; border: 1px solid #dee2e6;">${data.phone}</td></tr>
-              <tr><td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Event Type</td><td style="padding: 12px; border: 1px solid #dee2e6;">${data.eventType}</td></tr>
-              <tr style="background: #f8f9fa;"><td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Date</td><td style="padding: 12px; border: 1px solid #dee2e6;">${data.eventDate}</td></tr>
-              <tr><td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Guests</td><td style="padding: 12px; border: 1px solid #dee2e6;">${data.guestCount}</td></tr>
-              <tr style="background: #f8f9fa;"><td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold;">Message</td><td style="padding: 12px; border: 1px solid #dee2e6;">${data.message || 'None'}</td></tr>
-            </table>
-          </div>
-        </div>
-      `
-    });
-
-    console.log('✅ [CATERING] Email sent successfully');
-  } catch (error) {
-    console.error('❌ [CATERING] Email failed (non-blocking):', error.message);
-  }
-}
-
-// GET /api/catering/packages
+// GET /api/catering/packages (keep existing)
 router.get('/packages', async (req, res) => {
   try {
     const packages = [
@@ -94,11 +61,8 @@ router.get('/packages', async (req, res) => {
     ];
     res.json({ success: true, packages });
   } catch (error) {
-    console.error('❌ [CATERING] Packages error:', error.message);
     res.status(500).json({ success: false, message: 'Failed to fetch packages' });
   }
 });
 
-// ===== REQUIRED EXPORT - DO NOT REMOVE =====
 module.exports = router;
-// ============================================

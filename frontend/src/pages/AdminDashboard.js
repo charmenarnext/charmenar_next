@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { FiUsers, FiCalendar, FiDollarSign, FiPackage, FiLogOut, FiRefreshCw, FiEye, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiUsers, FiCalendar, FiDollarSign, FiPackage, FiLogOut, FiRefreshCw, FiEye, FiEdit, FiTrash2, FiFilter } from 'react-icons/fi';
 import './AdminDashboard.css';
 
-// ✅ API Base URL - Direct definition (no config import needed)
+// API Base URL
 const API_BASE_URL = 'https://charmenar-next-api.onrender.com/api';
 
 const AdminDashboard = () => {
@@ -23,19 +23,19 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [filterStatus, setFilterStatus] = useState('all');
 
-  // ✅ Check admin access on mount
+  // Check admin access
   useEffect(() => {
     if (!isAdmin) {
       toast.error('Access denied. Admins only.');
       navigate('/');
       return;
     }
-    
     fetchDashboardData();
   }, [isAdmin, navigate]);
 
-  // ✅ Fetch dashboard data from backend
+  // Fetch real data from backend
   const fetchDashboardData = async () => {
     if (refreshing) return;
     
@@ -43,7 +43,7 @@ const AdminDashboard = () => {
     setError(null);
     
     try {
-      console.log('📊 Fetching admin dashboard data...');
+      console.log('📊 Fetching real admin dashboard data...');
       const token = localStorage.getItem('token');
       
       if (!token) {
@@ -56,142 +56,145 @@ const AdminDashboard = () => {
       };
 
       // Fetch stats
-      try {
-        const statsResponse = await fetch(`${API_BASE_URL}/admin/stats`, { headers });
-        
-        if (statsResponse.ok) {
-          const statsData = await statsResponse.json();
-          setStats(statsData);
-          console.log('✅ Stats loaded:', statsData);
-        } else if (statsResponse.status === 404) {
-          console.log('⚠️ Stats endpoint not found, using mock data');
-          setStats(getMockStats());
-        } else {
-          throw new Error(`Stats API error: ${statsResponse.status}`);
-        }
-      } catch (statsError) {
-        console.warn('⚠️ Failed to fetch stats, using mock data:', statsError.message);
-        setStats(getMockStats());
+      const statsResponse = await fetch(`${API_BASE_URL}/admin/stats`, { headers });
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setStats(statsData);
+        console.log('✅ Stats loaded:', statsData);
+      } else {
+        throw new Error(`Stats API error: ${statsResponse.status}`);
       }
 
       // Fetch bookings
-      try {
-        const bookingsResponse = await fetch(`${API_BASE_URL}/admin/bookings`, { headers });
-        
-        if (bookingsResponse.ok) {
-          const bookingsData = await bookingsResponse.json();
-          setBookings(bookingsData);
-          console.log('✅ Bookings loaded:', bookingsData.length, 'items');
-        } else if (bookingsResponse.status === 404) {
-          console.log('⚠️ Bookings endpoint not found, using mock data');
-          setBookings(getMockBookings());
-        } else {
-          throw new Error(`Bookings API error: ${bookingsResponse.status}`);
-        }
-      } catch (bookingsError) {
-        console.warn('⚠️ Failed to fetch bookings, using mock data:', bookingsError.message);
-        setBookings(getMockBookings());
+      const bookingsResponse = await fetch(`${API_BASE_URL}/admin/bookings`, { headers });
+      if (bookingsResponse.ok) {
+        const bookingsData = await bookingsResponse.json();
+        setBookings(bookingsData);
+        console.log('✅ Bookings loaded:', bookingsData.length, 'items');
+      } else {
+        throw new Error(`Bookings API error: ${bookingsResponse.status}`);
       }
       
     } catch (error) {
       console.error('❌ Dashboard fetch error:', error);
-      setError('Failed to load dashboard data. Using demo mode.');
-      toast.warning('Using demo data - backend endpoints not available');
-      
-      // Fallback to mock data
-      setStats(getMockStats());
-      setBookings(getMockBookings());
+      setError('Failed to load dashboard data. Please check your connection.');
+      toast.error('Failed to fetch real data from server');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  // ✅ Mock data functions for demo mode
-  const getMockStats = () => ({
-    totalBookings: 24,
-    totalRevenue: 125000,
-    activeEvents: 8,
-    newInquiries: 5
-  });
-
-  const getMockBookings = () => [
-    { id: 1, client: 'Priya Sharma', event: 'Wedding', date: '2024-06-15', status: 'confirmed', amount: 45000, guests: 150 },
-    { id: 2, client: 'Rajesh Kumar', event: 'Corporate Event', date: '2024-06-20', status: 'pending', amount: 28000, guests: 80 },
-    { id: 3, client: 'Anita Reddy', event: 'Birthday Party', date: '2024-06-25', status: 'confirmed', amount: 15000, guests: 40 },
-    { id: 4, client: 'Vikram Singh', event: 'Anniversary', date: '2024-07-01', status: 'pending', amount: 22000, guests: 60 },
-    { id: 5, client: 'Meera Patel', event: 'Engagement', date: '2024-07-10', status: 'confirmed', amount: 35000, guests: 100 }
-  ];
-
-  // ✅ Handle manual refresh
   const handleRefresh = () => {
     setRefreshing(true);
     fetchDashboardData();
     toast.info('Refreshing data...');
   };
 
-  // ✅ Handle logout
   const handleLogout = () => {
     logout();
     navigate('/');
     toast.success('Logged out successfully');
   };
 
-  // ✅ Get status badge class
   const getStatusClass = (status) => {
     switch (status?.toLowerCase()) {
       case 'confirmed': return 'status-confirmed';
-      case 'pending': return 'status-pending';
+      case 'contacted': return 'status-contacted';
+      case 'pending': 
+      case 'new': return 'status-pending';
       case 'cancelled': return 'status-cancelled';
-      case 'completed': return 'status-completed';
-      default: return 'status-pending';
+      default: return 'status-new';
     }
   };
 
-  // ✅ Format currency
   const formatCurrency = (amount) => {
     if (!amount) return '₹0';
     return `₹${Number(amount).toLocaleString('en-IN')}`;
   };
 
-  // ✅ Format date
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+      year: 'numeric', month: 'short', day: 'numeric'
     });
   };
 
-  // ✅ Handle view booking
-  const handleViewBooking = (bookingId) => {
-    toast.info(`Viewing booking #${bookingId}`);
-    // TODO: Navigate to booking detail page
-    // navigate(`/admin/bookings/${bookingId}`);
+  const handleViewBooking = async (booking) => {
+    const details = `
+Client: ${booking.client}
+Email: ${booking.email}
+Phone: ${booking.phone}
+Event: ${booking.event}
+Date: ${formatDate(booking.date)}
+Guests: ${booking.guests}
+Status: ${booking.status}
+Message: ${booking.message || 'None'}
+    `.trim();
+    
+    alert(details);
+    // TODO: Navigate to detail page in future
   };
 
-  // ✅ Handle edit booking
-  const handleEditBooking = (bookingId) => {
-    toast.info(`Editing booking #${bookingId}`);
-    // TODO: Navigate to edit page
-  };
-
-  // ✅ Handle delete booking
-  const handleDeleteBooking = (bookingId) => {
-    if (window.confirm('Are you sure you want to delete this booking?')) {
-      toast.success(`Booking #${bookingId} deleted`);
-      // TODO: Call API to delete
-      setBookings(prev => prev.filter(b => b.id !== bookingId));
+  const handleUpdateStatus = async (bookingId, newStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/admin/bookings/${bookingId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      
+      if (response.ok) {
+        toast.success('Status updated successfully');
+        fetchDashboardData(); // Refresh data
+      } else {
+        throw new Error('Failed to update status');
+      }
+    } catch (error) {
+      console.error('Status update error:', error);
+      toast.error('Failed to update status');
     }
   };
 
-  // ✅ Loading state
+  const handleDeleteBooking = async (bookingId) => {
+    if (!window.confirm('Are you sure you want to delete this booking? This cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/admin/bookings/${bookingId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        toast.success('Booking deleted successfully');
+        setBookings(prev => prev.filter(b => b.id !== bookingId));
+        fetchDashboardData(); // Refresh stats
+      } else {
+        throw new Error('Failed to delete');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Failed to delete booking');
+    }
+  };
+
+  // Filter bookings by status
+  const filteredBookings = filterStatus === 'all' 
+    ? bookings 
+    : bookings.filter(b => b.status === filterStatus);
+
   if (loading) {
     return (
       <div className="admin-dashboard-loading">
         <div className="spinner-large"></div>
-        <p>Loading dashboard...</p>
+        <p>Loading real data from server...</p>
       </div>
     );
   }
@@ -202,15 +205,11 @@ const AdminDashboard = () => {
       <header className="admin-header">
         <div className="admin-header-content">
           <div>
-            <h1>
-              Admin <span className="gradient-text">Dashboard</span>
-            </h1>
-            <p className="admin-subtitle">Manage your catering & events business</p>
+            <h1>Admin <span className="gradient-text">Dashboard</span></h1>
+            <p className="admin-subtitle">Manage real bookings & inquiries</p>
           </div>
           <div className="admin-user-info">
-            <div className="user-avatar">
-              {user?.name?.charAt(0)?.toUpperCase() || 'A'}
-            </div>
+            <div className="user-avatar">{user?.name?.charAt(0)?.toUpperCase() || 'A'}</div>
             <div className="user-details">
               <span className="user-name">{user?.name}</span>
               <span className="user-role">Administrator</span>
@@ -227,45 +226,35 @@ const AdminDashboard = () => {
         <div className="error-banner">
           <span>⚠️</span>
           <p>{error}</p>
+          <button onClick={handleRefresh} className="retry-btn">Retry</button>
         </div>
       )}
 
-      {/* Stats Cards */}
+      {/* Stats Cards - REAL DATA */}
       <section className="admin-stats">
         <div className="stat-card">
-          <div className="stat-icon-wrapper">
-            <FiCalendar className="stat-icon" />
-          </div>
+          <div className="stat-icon-wrapper"><FiCalendar className="stat-icon" /></div>
           <div className="stat-content">
             <h3 className="stat-value">{stats.totalBookings}</h3>
             <p className="stat-label">Total Bookings</p>
           </div>
         </div>
-        
         <div className="stat-card">
-          <div className="stat-icon-wrapper">
-            <FiDollarSign className="stat-icon" />
-          </div>
+          <div className="stat-icon-wrapper"><FiDollarSign className="stat-icon" /></div>
           <div className="stat-content">
             <h3 className="stat-value">{formatCurrency(stats.totalRevenue)}</h3>
-            <p className="stat-label">Total Revenue</p>
+            <p className="stat-label">Estimated Revenue</p>
           </div>
         </div>
-        
         <div className="stat-card">
-          <div className="stat-icon-wrapper">
-            <FiPackage className="stat-icon" />
-          </div>
+          <div className="stat-icon-wrapper"><FiPackage className="stat-icon" /></div>
           <div className="stat-content">
             <h3 className="stat-value">{stats.activeEvents}</h3>
-            <p className="stat-label">Active Events</p>
+            <p className="stat-label">Confirmed Events</p>
           </div>
         </div>
-        
         <div className="stat-card">
-          <div className="stat-icon-wrapper">
-            <FiUsers className="stat-icon" />
-          </div>
+          <div className="stat-icon-wrapper"><FiUsers className="stat-icon" /></div>
           <div className="stat-content">
             <h3 className="stat-value">{stats.newInquiries}</h3>
             <p className="stat-label">New Inquiries</p>
@@ -273,33 +262,47 @@ const AdminDashboard = () => {
         </div>
       </section>
 
-      {/* Bookings Section */}
+      {/* Bookings Section - REAL DATA */}
       <section className="admin-bookings">
         <div className="bookings-header">
-          <h2>Recent Bookings</h2>
-          <button 
-            onClick={handleRefresh} 
-            className={`refresh-btn ${refreshing ? 'refreshing' : ''}`}
-            disabled={refreshing}
-          >
-            <FiRefreshCw className={refreshing ? 'spinning' : ''} /> 
-            {refreshing ? 'Refreshing...' : 'Refresh'}
-          </button>
+          <h2>Recent Bookings ({filteredBookings.length})</h2>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <select 
+              value={filterStatus} 
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Status</option>
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <button 
+              onClick={handleRefresh} 
+              className={`refresh-btn ${refreshing ? 'refreshing' : ''}`}
+              disabled={refreshing}
+            >
+              <FiRefreshCw className={refreshing ? 'spinning' : ''} /> 
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
         </div>
         
         <div className="bookings-table-container">
-          {bookings.length === 0 ? (
+          {filteredBookings.length === 0 ? (
             <div className="empty-state">
               <FiPackage className="empty-icon" />
               <p>No bookings found</p>
-              <button className="btn-primary">Add New Booking</button>
+              <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>Bookings will appear here when users submit forms</p>
             </div>
           ) : (
             <table className="bookings-table">
               <thead>
                 <tr>
                   <th>Client</th>
-                  <th>Event Type</th>
+                  <th>Type</th>
+                  <th>Event</th>
                   <th>Date</th>
                   <th>Guests</th>
                   <th>Status</th>
@@ -308,45 +311,41 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {bookings.map((booking) => (
+                {filteredBookings.map((booking) => (
                   <tr key={booking.id} className="booking-row">
                     <td className="client-cell">
                       <div className="client-info">
-                        <div className="client-avatar">
-                          {booking.client?.charAt(0)?.toUpperCase()}
+                        <div className="client-avatar">{booking.client?.charAt(0)?.toUpperCase()}</div>
+                        <div>
+                          <span className="client-name">{booking.client}</span>
+                          <span className="client-email" style={{ fontSize: '0.8rem', opacity: 0.7 }}>{booking.email}</span>
                         </div>
-                        <span className="client-name">{booking.client}</span>
                       </div>
+                    </td>
+                    <td>
+                      <span className="type-badge">{booking.type}</span>
                     </td>
                     <td>{booking.event}</td>
                     <td>{formatDate(booking.date)}</td>
-                    <td>{booking.guests || 'N/A'}</td>
+                    <td>{booking.guests}</td>
                     <td>
-                      <span className={`status-badge ${getStatusClass(booking.status)}`}>
-                        {booking.status}
-                      </span>
+                      <select 
+                        className={`status-select ${getStatusClass(booking.status)}`}
+                        value={booking.status}
+                        onChange={(e) => handleUpdateStatus(booking.id, e.target.value)}
+                      >
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
                     </td>
                     <td className="amount-cell">{formatCurrency(booking.amount)}</td>
                     <td className="actions-cell">
-                      <button 
-                        className="action-btn view-btn" 
-                        onClick={() => handleViewBooking(booking.id)}
-                        title="View"
-                      >
+                      <button className="action-btn view-btn" onClick={() => handleViewBooking(booking)} title="View">
                         <FiEye />
                       </button>
-                      <button 
-                        className="action-btn edit-btn" 
-                        onClick={() => handleEditBooking(booking.id)}
-                        title="Edit"
-                      >
-                        <FiEdit />
-                      </button>
-                      <button 
-                        className="action-btn delete-btn" 
-                        onClick={() => handleDeleteBooking(booking.id)}
-                        title="Delete"
-                      >
+                      <button className="action-btn delete-btn" onClick={() => handleDeleteBooking(booking.id)} title="Delete">
                         <FiTrash2 />
                       </button>
                     </td>
@@ -355,29 +354,6 @@ const AdminDashboard = () => {
               </tbody>
             </table>
           )}
-        </div>
-      </section>
-
-      {/* Quick Actions */}
-      <section className="admin-quick-actions">
-        <h3>Quick Actions</h3>
-        <div className="quick-actions-grid">
-          <button className="action-card">
-            <FiCalendar className="action-icon" />
-            <span>Create New Event</span>
-          </button>
-          <button className="action-card">
-            <FiUsers className="action-icon" />
-            <span>View Inquiries</span>
-          </button>
-          <button className="action-card">
-            <FiDollarSign className="action-icon" />
-            <span>Generate Report</span>
-          </button>
-          <button className="action-card">
-            <FiPackage className="action-icon" />
-            <span>Manage Packages</span>
-          </button>
         </div>
       </section>
     </div>

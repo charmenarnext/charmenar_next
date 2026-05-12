@@ -25,18 +25,22 @@ const ContactUs = () => {
     setLoading(true);
 
     try {
-      // You can add backend API call here
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success('Thank you! Your message has been sent successfully.');
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
+      const response = await fetch('https://charmenar-next-api.onrender.com/api/contact/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data.message);
+        setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+      } else {
+        toast.error(data.message || 'Failed to send message');
+      }
     } catch (error) {
+      console.error('Contact submit error:', error);
       toast.error('Failed to send message. Please try again.');
     } finally {
       setLoading(false);
