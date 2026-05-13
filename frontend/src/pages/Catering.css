@@ -1,3 +1,29 @@
+/* ✅ PREVENT OVERFLOW ON CATERING PAGE */
+.catering-page {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden !important;
+  padding-top: 80px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1c26 0%, #1a2f3f 100%);
+}
+
+/* Fix menu grid overflow */
+.menu-grid {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Fix form container overflow */
+.form-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* ... rest of your existing Catering.css ... */
 /* ===== PAGE BACKGROUND - MATCHES LOGIN/REGISTER ===== */
 .catering-page {
   padding-top: 80px;
