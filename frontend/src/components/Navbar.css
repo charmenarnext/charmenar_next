@@ -25,7 +25,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  overflow: visible; /* Prevents clipping on mobile */
+  overflow: visible; /* ✅ CRITICAL: Allows hamburger to show fully */
 }
 
 /* ===== LOGO ===== */
@@ -73,7 +73,7 @@
   align-items: center;
 }
 
-/* ===== TEXT LINKS (Home, Catering, etc.) ===== */
+/* ===== TEXT LINKS ===== */
 .navbar-link {
   text-decoration: none;
   color: #343a40;
@@ -186,9 +186,13 @@
   flex-direction: column;
   cursor: pointer;
   gap: 6px;
-  padding: 8px;
+  padding: 12px;
   border-radius: 8px;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 10px;
+  z-index: 1002; /* ✅ CRITICAL: Stays above sliding menu */
+  position: relative;
 }
 
 .hamburger:hover { background: rgba(0, 0, 0, 0.05); }
@@ -200,33 +204,35 @@
   background: #0f1c26;
   border-radius: 3px;
   transition: all 0.3s ease;
+  display: block;
 }
 
 .hamburger.active .hamburger-line:nth-child(1) { transform: rotate(45deg) translate(6px, 6px); }
 .hamburger.active .hamburger-line:nth-child(2) { opacity: 0; }
 .hamburger.active .hamburger-line:nth-child(3) { transform: rotate(-45deg) translate(7px, -7px); }
 
-/* ===== ✅ MOBILE FIXES (Only affects screens < 900px) ===== */
+/* ===== ✅ MOBILE FIXES ===== */
 @media (max-width: 900px) {
   .navbar-container {
-    padding: 0 12px; /* Reduced padding for more breathing room */
-    gap: 15px; /* Adds distance between logo and hamburger */
+    padding: 0 15px; /* More space on sides */
+    gap: 10px; /* Space between logo and hamburger */
   }
 
   .hamburger {
     display: flex;
-    z-index: 1002; /* ✅ Stays ON TOP of the sliding menu */
-    flex-shrink: 0; /* ✅ Prevents squishing */
-    margin-left: auto; /* ✅ Pushes it to the far right */
-    padding: 12px; /* Larger tap target */
+    z-index: 1002; /* ✅ Stays on top of sliding menu */
+    flex-shrink: 0; /* Never squishes */
+    margin-left: auto; /* Pushes to far right */
+    padding: 12px 15px; /* Comfortable tap area */
+    right: 0; /* Aligns to edge */
   }
 
   .navbar-menu {
     position: fixed;
     top: 0;
     right: -100%;
-    width: 85vw; /* ✅ Leaves space so hamburger isn't covered */
-    max-width: 300px;
+    width: 80vw; /* ✅ Leaves room for hamburger */
+    max-width: 280px;
     height: 100vh;
     background: white;
     flex-direction: column;
@@ -236,6 +242,7 @@
     box-shadow: -5px 0 30px rgba(0,0,0,0.15);
     z-index: 1001; /* ✅ Below hamburger */
     align-items: stretch;
+    overflow-y: auto;
   }
 
   .navbar-menu.active {
@@ -264,7 +271,26 @@
 }
 
 @media (max-width: 480px) {
-  .navbar-container { padding: 0 10px; }
-  .navbar-logo-text { font-size: 20px; }
-  .navbar-logo-img { height: 40px; }
+  .navbar-container { 
+    padding: 0 10px; 
+    gap: 8px;
+  }
+  
+  .navbar-logo-text { 
+    font-size: 18px; 
+  }
+  
+  .navbar-logo-img { 
+    height: 38px; 
+  }
+  
+  .hamburger {
+    padding: 10px 12px;
+    gap: 5px;
+  }
+  
+  .hamburger-line {
+    width: 24px;
+    height: 2.5px;
+  }
 }
