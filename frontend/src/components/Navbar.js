@@ -27,14 +27,9 @@ const Navbar = () => {
   return (
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
-        {/* Logo - FIXED PATH */}
+        {/* Logo */}
         <Link to="/" className="navbar-logo">
-          {/* Use process.env.PUBLIC_URL to fix GitHub Pages path issue */}
-          <img 
-            src={`${process.env.PUBLIC_URL}/logo.png`} 
-            alt="Charmenar Next" 
-            className="navbar-logo-img" 
-          />
+          <img src={`${process.env.PUBLIC_URL}/logo.png`} alt="Charmenar Next" className="navbar-logo-img" />
           <span className="navbar-logo-text">
             Charmenar <span style={{ color: '#D4AF37' }}>Next</span>
           </span>
@@ -42,18 +37,19 @@ const Navbar = () => {
 
         {/* Navigation Menu */}
         <ul className={`navbar-menu ${isMobileMenuOpen ? 'active' : ''}`}>
-          <li><Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link></li>
-          <li><Link to="/catering" onClick={() => setIsMobileMenuOpen(false)}>Catering</Link></li>
-          <li><Link to="/events" onClick={() => setIsMobileMenuOpen(false)}>Events</Link></li>
-          <li><Link to="/about" onClick={() => setIsMobileMenuOpen(false)}>About</Link></li>
-          <li><Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</Link></li>
+          {/* ✅ FIX: Added className="navbar-link" to all text items */}
+          <li><Link to="/" className="navbar-link" onClick={() => setIsMobileMenuOpen(false)}>Home</Link></li>
+          <li><Link to="/catering" className="navbar-link" onClick={() => setIsMobileMenuOpen(false)}>Catering</Link></li>
+          <li><Link to="/events" className="navbar-link" onClick={() => setIsMobileMenuOpen(false)}>Events</Link></li>
+          <li><Link to="/about" className="navbar-link" onClick={() => setIsMobileMenuOpen(false)}>About</Link></li>
+          <li><Link to="/contact" className="navbar-link" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</Link></li>
           
           {/* Admin Dashboard Link */}
           {isAdmin && (
-            <li><Link to="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link></li>
+            <li><Link to="/admin/dashboard" className="navbar-link" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link></li>
           )}
           
-          {/* Auth Buttons - Premium Design Classes */}
+          {/* Auth Buttons */}
           {isAuthenticated && user ? (
             <>
               <li>

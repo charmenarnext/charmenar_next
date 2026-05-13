@@ -61,7 +61,7 @@
 .navbar-menu {
   display: flex;
   list-style: none;
-  gap: 20px; /* Reduced gap to fit pills */
+  gap: 15px;
   align-items: center;
   margin: 0;
   padding: 0;
@@ -72,35 +72,36 @@
   align-items: center;
 }
 
-/* ===== NAVIGATION TEXT LINKS (Home, Catering, etc.) ===== */
-/* ✅ NEW DESIGN: Pill buttons for better click feedback */
+/* ===== ✅ NEW: STYLING FOR TEXT LINKS (Home, Catering, etc.) ===== */
 .navbar-link {
   text-decoration: none;
   color: #343a40;
   font-weight: 600;
   font-size: 15px;
-  padding: 8px 16px; /* Padding to create the "pill" shape */
-  border-radius: 20px; /* Rounded corners */
-  transition: all 0.2s ease-in-out;
+  
+  /* Button Shape & Padding */
+  padding: 10px 18px; 
+  border-radius: 30px; /* Fully rounded pill shape */
+  background: transparent;
+  border: 1px solid transparent; /* Invisible border for hover stability */
+  
+  transition: all 0.2s ease;
   cursor: pointer;
-  user-select: none;
-  border: 1px solid transparent; /* invisible border to prevent layout shift */
-  position: relative;
+  white-space: nowrap;
 }
 
-/* ✅ HOVER: Light gold background + text color change */
+/* Hover Effect for Text Links */
 .navbar-link:hover {
-  color: #D4AF37;
-  background: rgba(212, 175, 55, 0.12);
-  border-color: rgba(212, 175, 55, 0.2);
+  color: #D4AF37; /* Gold Text */
+  background: rgba(212, 175, 55, 0.15); /* Light Gold Background */
+  border-color: rgba(212, 175, 55, 0.3); /* Subtle Gold Border */
 }
 
-/* ✅ ACTIVE/CLICK: "Press down" effect */
+/* Active/Click Effect (The "Press" feel) */
 .navbar-link:active {
-  transform: scale(0.95); /* Shrinks slightly to feel pressed */
-  background: rgba(212, 175, 55, 0.25);
-  color: #9A7B22; /* Darker gold text */
-  border-color: rgba(212, 175, 55, 0.5);
+  transform: scale(0.95); /* Shrinks slightly */
+  background: rgba(212, 175, 55, 0.25); /* Darker Gold Background */
+  color: #b8860b;
 }
 
 /* ===== ACTION BUTTONS (Login/Register/Logout) ===== */
@@ -128,21 +129,15 @@
   transform: translateY(0);
 }
 
-/* ✅ HOVER STATE - Lift & Glow */
+/* Hover State - Lift & Glow */
 .navbar-btn:hover {
   transform: translateY(-2px);
 }
 
-/* ✅ ACTIVE/CLICK STATE - Press down effect */
+/* Active/Click State - Press down effect */
 .navbar-btn:active {
   transform: translateY(1px) scale(0.96);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
-}
-
-/* ✅ FOCUS STATE - Accessibility */
-.navbar-btn:focus-visible {
-  outline: 3px solid rgba(212, 175, 55, 0.5);
-  outline-offset: 3px;
 }
 
 /* 1. Login Button (Gold Outline) */
@@ -160,11 +155,6 @@
   box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25);
 }
 
-.navbar-btn.login-btn:active {
-  background: rgba(212, 175, 55, 0.25);
-  border-color: #D4AF37;
-}
-
 /* 2. Register Button (Gold Gradient) */
 .navbar-btn.register-btn {
   background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
@@ -179,10 +169,6 @@
   box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
 }
 
-.navbar-btn.register-btn:active {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-}
-
 /* 3. Logout Button (Red Accent) */
 .navbar-btn.logout-btn {
   background: #ff4d4d;
@@ -195,11 +181,6 @@
   background: #e60000;
   box-shadow: 0 8px 25px rgba(255, 77, 77, 0.4);
   transform: translateY(-2px);
-}
-
-.navbar-btn.logout-btn:active {
-  transform: translateY(1px) scale(0.96);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* User Greeting */
@@ -232,10 +213,6 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
-.hamburger:active {
-  transform: scale(0.95);
-}
-
 .hamburger-line {
   width: 28px;
   height: 3px;
@@ -257,14 +234,14 @@
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 1024px) {
+@media (max-width: 1100px) {
   .navbar-menu {
-    gap: 10px; /* Tighter gap for smaller screens */
+    gap: 5px; /* Tighter spacing */
   }
   
   .navbar-link {
+    padding: 8px 12px; /* Smaller buttons */
     font-size: 14px;
-    padding: 6px 12px; /* Smaller pills */
   }
 }
 
@@ -283,51 +260,27 @@
     background: white;
     flex-direction: column;
     padding: 100px 30px 30px;
-    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    gap: 20px;
+    transition: right 0.4s ease;
+    gap: 15px;
     box-shadow: -5px 0 30px rgba(0,0,0,0.1);
     z-index: 1000;
-    align-items: stretch; /* Stretch links to full width */
+    align-items: stretch;
   }
 
   .navbar-menu.active {
     right: 0;
   }
 
-  /* Mobile Links - Full Width Pills */
   .navbar-link {
     font-size: 18px;
-    font-weight: 600;
+    padding: 14px;
     width: 100%;
-    padding: 14px 16px;
-    text-align: left;
-    background: rgba(0,0,0,0.03); /* Slight bg for mobile items */
+    text-align: center;
+    background: rgba(0,0,0,0.03);
   }
 
   .navbar-btn {
     width: 100%;
-    padding: 14px;
-    font-size: 16px;
     justify-content: center;
-  }
-  
-  .user-greeting {
-    width: 100%;
-    justify-content: center;
-    padding: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .navbar-container {
-    padding: 0 20px;
-  }
-  
-  .navbar-logo-text {
-    font-size: 20px;
-  }
-  
-  .navbar-logo-img {
-    height: 40px;
   }
 }
