@@ -25,6 +25,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  overflow: visible; /* Prevents clipping on mobile */
 }
 
 /* ===== LOGO ===== */
@@ -72,39 +73,34 @@
   align-items: center;
 }
 
-/* ===== ✅ NEW: STYLING FOR TEXT LINKS (Home, Catering, etc.) ===== */
+/* ===== TEXT LINKS (Home, Catering, etc.) ===== */
 .navbar-link {
   text-decoration: none;
   color: #343a40;
   font-weight: 600;
   font-size: 15px;
-  
-  /* Button Shape & Padding */
-  padding: 10px 18px; 
-  border-radius: 30px; /* Fully rounded pill shape */
+  padding: 10px 18px;
+  border-radius: 30px;
   background: transparent;
-  border: 1px solid transparent; /* Invisible border for hover stability */
-  
+  border: 1px solid transparent;
   transition: all 0.2s ease;
   cursor: pointer;
   white-space: nowrap;
 }
 
-/* Hover Effect for Text Links */
 .navbar-link:hover {
-  color: #D4AF37; /* Gold Text */
-  background: rgba(212, 175, 55, 0.15); /* Light Gold Background */
-  border-color: rgba(212, 175, 55, 0.3); /* Subtle Gold Border */
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.3);
 }
 
-/* Active/Click Effect (The "Press" feel) */
 .navbar-link:active {
-  transform: scale(0.95); /* Shrinks slightly */
-  background: rgba(212, 175, 55, 0.25); /* Darker Gold Background */
+  transform: scale(0.95);
+  background: rgba(212, 175, 55, 0.25);
   color: #b8860b;
 }
 
-/* ===== ACTION BUTTONS (Login/Register/Logout) ===== */
+/* ===== ACTION BUTTONS ===== */
 .navbar-btn {
   position: relative;
   overflow: hidden;
@@ -129,25 +125,15 @@
   transform: translateY(0);
 }
 
-/* Hover State - Lift & Glow */
-.navbar-btn:hover {
-  transform: translateY(-2px);
-}
+.navbar-btn:hover { transform: translateY(-2px); }
+.navbar-btn:active { transform: translateY(1px) scale(0.96); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important; }
 
-/* Active/Click State - Press down effect */
-.navbar-btn:active {
-  transform: translateY(1px) scale(0.96);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
-}
-
-/* 1. Login Button (Gold Outline) */
 .navbar-btn.login-btn {
   background: transparent;
   border-color: #D4AF37;
   color: #D4AF37;
   box-shadow: 0 2px 8px rgba(212, 175, 55, 0.1);
 }
-
 .navbar-btn.login-btn:hover {
   background: rgba(212, 175, 55, 0.12);
   border-color: #F4D03F;
@@ -155,7 +141,6 @@
   box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25);
 }
 
-/* 2. Register Button (Gold Gradient) */
 .navbar-btn.register-btn {
   background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
   color: #0f1c26;
@@ -163,20 +148,17 @@
   box-shadow: 0 4px 15px rgba(212, 175, 55, 0.35);
   font-weight: 700;
 }
-
 .navbar-btn.register-btn:hover {
   background: linear-gradient(135deg, #F4D03F 0%, #D4AF37 100%);
   box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
 }
 
-/* 3. Logout Button (Red Accent) */
 .navbar-btn.logout-btn {
   background: #ff4d4d;
   color: white;
   border: none;
   box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
 }
-
 .navbar-btn.logout-btn:hover {
   background: #e60000;
   box-shadow: 0 8px 25px rgba(255, 77, 77, 0.4);
@@ -209,9 +191,8 @@
   transition: background 0.2s ease;
 }
 
-.hamburger:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
+.hamburger:hover { background: rgba(0, 0, 0, 0.05); }
+.hamburger:active { transform: scale(0.95); }
 
 .hamburger-line {
   width: 28px;
@@ -221,49 +202,39 @@
   transition: all 0.3s ease;
 }
 
-.hamburger.active .hamburger-line:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 6px);
-}
+.hamburger.active .hamburger-line:nth-child(1) { transform: rotate(45deg) translate(6px, 6px); }
+.hamburger.active .hamburger-line:nth-child(2) { opacity: 0; }
+.hamburger.active .hamburger-line:nth-child(3) { transform: rotate(-45deg) translate(7px, -7px); }
 
-.hamburger.active .hamburger-line:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger.active .hamburger-line:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -7px);
-}
-
-/* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 1100px) {
-  .navbar-menu {
-    gap: 5px; /* Tighter spacing */
-  }
-  
-  .navbar-link {
-    padding: 8px 12px; /* Smaller buttons */
-    font-size: 14px;
-  }
-}
-
+/* ===== ✅ MOBILE FIXES (Only affects screens < 900px) ===== */
 @media (max-width: 900px) {
+  .navbar-container {
+    padding: 0 12px; /* Reduced padding for more breathing room */
+    gap: 15px; /* Adds distance between logo and hamburger */
+  }
+
   .hamburger {
     display: flex;
-    z-index: 1001;
+    z-index: 1002; /* ✅ Stays ON TOP of the sliding menu */
+    flex-shrink: 0; /* ✅ Prevents squishing */
+    margin-left: auto; /* ✅ Pushes it to the far right */
+    padding: 12px; /* Larger tap target */
   }
 
   .navbar-menu {
     position: fixed;
     top: 0;
     right: -100%;
-    width: 280px;
+    width: 85vw; /* ✅ Leaves space so hamburger isn't covered */
+    max-width: 300px;
     height: 100vh;
     background: white;
     flex-direction: column;
-    padding: 100px 30px 30px;
-    transition: right 0.4s ease;
+    padding: 95px 20px 30px;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     gap: 15px;
-    box-shadow: -5px 0 30px rgba(0,0,0,0.1);
-    z-index: 1000;
+    box-shadow: -5px 0 30px rgba(0,0,0,0.15);
+    z-index: 1001; /* ✅ Below hamburger */
     align-items: stretch;
   }
 
@@ -282,5 +253,18 @@
   .navbar-btn {
     width: 100%;
     justify-content: center;
+    padding: 14px;
   }
+
+  .user-greeting {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-container { padding: 0 10px; }
+  .navbar-logo-text { font-size: 20px; }
+  .navbar-logo-img { height: 40px; }
 }
