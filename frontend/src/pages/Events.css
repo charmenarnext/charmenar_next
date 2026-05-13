@@ -473,3 +473,75 @@
     padding: 30px 20px;
   }
 }
+
+/* ===== MOBILE FORM FIXES ===== */
+@media (max-width: 768px) {
+  .events-page {
+    padding-top: 100px;
+  }
+
+  .form-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 30px 20px !important;
+    border-radius: 20px;
+  }
+
+  .event-form-section {
+    padding: 40px 15px !important;
+  }
+
+  .form-group {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 14px 16px !important;
+    font-size: 16px !important;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    width: 100% !important;
+  }
+
+  .event-form {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .form-submit {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Fix event cards overflow */
+  .events-grid {
+    padding: 0 10px;
+  }
+
+  .event-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-container {
+    padding: 25px 15px !important;
+    border-radius: 15px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 12px 14px !important;
+  }
+}
