@@ -1,3 +1,16 @@
+/* ✅ CRITICAL: Prevent pages from clipping the fixed navbar */
+body, #root, .App {
+  overflow-x: visible !important;
+}
+
+/* Ensure all pages allow navbar to be visible */
+.catering-page,
+.events-page,
+.contact-page,
+.about-page,
+.home-page {
+  overflow-x: visible !important;
+}
 /* Charmenar Next - Global Styles */
 
 * {
