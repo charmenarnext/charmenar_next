@@ -238,15 +238,25 @@ const ContactUs = () => {
         </div>
 
         {/* Map Section */}
-        <div className="contact-map">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.3456789012345!2d78.40512345678901!3d17.423456789012345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a35f0e0e0e0e0e0%3A0xe0e0e0e0e0e0e0e0!2sJubilee%20Hills%2C%20Hyderabad%2C%20Telangana!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
-            allowFullScreen=""
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Charmenar Next Location"
-          ></iframe>
-        </div>
+        <section className="contact-map-section">
+          <h2 className="map-title">Find Us <span className="gradient-text">Here</span></h2>
+          <div className="map-container">
+            <iframe
+              title="Charmenar Next Location"
+              src="https://maps.google.com/maps?width=600&height=400&hl=en&q=plot%20no%20533%2CK7%2Cvipul%20garden%20Road%2CBhubaneswar&t=&z=15&ie=UTF8&iwloc=B&output=embed"
+              width="100%"
+              height="450"
+              style={{ border: 0, borderRadius: '20px' }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+          <div className="map-address">
+            <FiMapPin className="map-icon" />
+            <p>Plot no 533, K7,Vipul Garden Road, Bhubaneswar, Odisha 751003, India</p>
+          </div>
+        </section>
 
         {/* Social Media Section */}
         <section className="contact-social">
