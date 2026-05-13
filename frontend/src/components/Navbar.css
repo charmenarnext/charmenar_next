@@ -61,7 +61,7 @@
 .navbar-menu {
   display: flex;
   list-style: none;
-  gap: 30px;
+  gap: 20px; /* Reduced gap to fit pills */
   align-items: center;
   margin: 0;
   padding: 0;
@@ -72,43 +72,38 @@
   align-items: center;
 }
 
+/* ===== NAVIGATION TEXT LINKS (Home, Catering, etc.) ===== */
+/* ✅ NEW DESIGN: Pill buttons for better click feedback */
 .navbar-link {
   text-decoration: none;
   color: #343a40;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 15px;
-  transition: all 0.3s ease;
-  position: relative;
-  padding: 5px 0;
+  padding: 8px 16px; /* Padding to create the "pill" shape */
+  border-radius: 20px; /* Rounded corners */
+  transition: all 0.2s ease-in-out;
   cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent; /* invisible border to prevent layout shift */
+  position: relative;
 }
 
-.navbar-link::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #D4AF37, #F4D03F);
-  transition: width 0.3s ease;
-}
-
-.navbar-link:hover::after,
-.navbar-link:active::after {
-  width: 100%;
-}
-
-.navbar-link:hover,
-.navbar-link:active {
+/* ✅ HOVER: Light gold background + text color change */
+.navbar-link:hover {
   color: #D4AF37;
+  background: rgba(212, 175, 55, 0.12);
+  border-color: rgba(212, 175, 55, 0.2);
 }
 
+/* ✅ ACTIVE/CLICK: "Press down" effect */
 .navbar-link:active {
-  transform: scale(0.98);
+  transform: scale(0.95); /* Shrinks slightly to feel pressed */
+  background: rgba(212, 175, 55, 0.25);
+  color: #9A7B22; /* Darker gold text */
+  border-color: rgba(212, 175, 55, 0.5);
 }
 
-/* ===== PREMIUM BUTTONS DESIGN ===== */
+/* ===== ACTION BUTTONS (Login/Register/Logout) ===== */
 .navbar-btn {
   position: relative;
   overflow: hidden;
@@ -144,7 +139,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* ✅ FOCUS STATE - Accessibility & clear feedback */
+/* ✅ FOCUS STATE - Accessibility */
 .navbar-btn:focus-visible {
   outline: 3px solid rgba(212, 175, 55, 0.5);
   outline-offset: 3px;
@@ -264,11 +259,12 @@
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1024px) {
   .navbar-menu {
-    gap: 20px;
+    gap: 10px; /* Tighter gap for smaller screens */
   }
   
   .navbar-link {
     font-size: 14px;
+    padding: 6px 12px; /* Smaller pills */
   }
 }
 
@@ -291,24 +287,28 @@
     gap: 20px;
     box-shadow: -5px 0 30px rgba(0,0,0,0.1);
     z-index: 1000;
-    align-items: flex-start;
+    align-items: stretch; /* Stretch links to full width */
   }
 
   .navbar-menu.active {
     right: 0;
   }
 
+  /* Mobile Links - Full Width Pills */
   .navbar-link {
     font-size: 18px;
     font-weight: 600;
     width: 100%;
-    padding: 12px 0;
+    padding: 14px 16px;
+    text-align: left;
+    background: rgba(0,0,0,0.03); /* Slight bg for mobile items */
   }
 
   .navbar-btn {
     width: 100%;
     padding: 14px;
     font-size: 16px;
+    justify-content: center;
   }
   
   .user-greeting {
