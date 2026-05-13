@@ -545,3 +545,45 @@
     padding: 12px 14px !important;
   }
 }
+
+/* ===== DATE INPUT FIX FOR MOBILE ===== */
+@media (max-width: 768px) {
+  /* Fix date input background and styling */
+  input[type="date"] {
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #0f1c26 !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+  }
+
+  /* Style the date picker icon */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.3) sepia(1) hue-rotate(10deg) saturate(3);
+    cursor: pointer;
+    padding: 5px;
+  }
+
+  /* Ensure placeholder text is visible */
+  input[type="date"]:invalid {
+    color: rgba(15, 28, 38, 0.5) !important;
+  }
+
+  /* Fix for empty date fields */
+  input[type="date"]::before {
+    content: attr(placeholder);
+    color: rgba(15, 28, 38, 0.5);
+    display: block;
+    padding: 14px 16px;
+  }
+
+  input[type="date"]:focus::before,
+  input[type="date"]:valid::before {
+    display: none;
+  }
+
+  /* Fix form group containing date inputs */
+  .form-group:has(input[type="date"]) {
+    position: relative;
+  }
+}

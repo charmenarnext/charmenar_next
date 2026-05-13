@@ -252,6 +252,8 @@ const Catering = () => {
                     onChange={handleChange}
                     required
                     disabled={loading}
+                    min={new Date().toISOString().split('T')[0]}
+                    aria-label="Event Date"
                   />
                 </div>
 
