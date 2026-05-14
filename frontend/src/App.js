@@ -1,5 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+// ✅ FIX: Use HashRouter instead of BrowserRouter for reliable routing
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -52,13 +53,15 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 // MAIN APP COMPONENT
 // ==========================================
 function App() {
-  // ✅ SIMPLIFIED: Use root basename for ALL environments
-  // Relative paths (homepage: ".") handle asset loading
-  const basename = '/';
-
+  // ✅ HashRouter works on ALL environments without basename
+  // Custom domain: https://charmenarnext.com/#/admin/login
+  // GitHub Pages: https://charmenarnext.github.io/charmenar_next/#/admin/login
+  // Local: http://localhost:3003/#/admin/login
+  
   return (
     <AuthProvider>
-      <Router basename={basename}>
+      {/* ✅ No basename prop needed with HashRouter */}
+      <Router>
         <div className="App">
           <Navbar />
           
