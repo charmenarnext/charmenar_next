@@ -22,7 +22,9 @@ import ResetPassword from './pages/ResetPassword';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 
-// Protected Route Component
+// ==========================================
+// PROTECTED ROUTE COMPONENT
+// ==========================================
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
 
@@ -46,14 +48,38 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   return children;
 };
 
+// ==========================================
+// AUTO-DETECT BASENAME FOR GITHUB PAGES
+// ==========================================
+const getBasename = () => {
+  // Local development: no basename
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return '/';
+  }
+  
+  // GitHub Pages: use /charmenar_next as basename
+  if (window.location.hostname.includes('github.io')) {
+    return '/charmenar_next';
+  }
+  
+  // Custom domain: no basename (root path)
+  return '/';
+};
+
+// ==========================================
+// MAIN APP COMPONENT
+// ==========================================
 function App() {
+  const basename = getBasename();
+
   return (
     <AuthProvider>
-      <Router basename="/charmenar_next">
+      <Router basename={basename}>
         <div className="App">
           <Navbar />
+          
           <Routes>
-            {/* Public Routes */}
+            {/* ===== PUBLIC ROUTES ===== */}
             <Route path="/" element={<Home />} />
             <Route path="/catering" element={<Catering />} />
             <Route path="/events" element={<Events />} />
@@ -65,7 +91,7 @@ function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             
-            {/* Protected Routes */}
+            {/* ===== PROTECTED ADMIN ROUTES ===== */}
             <Route 
               path="/admin/dashboard" 
               element={
@@ -75,10 +101,12 @@ function App() {
               } 
             />
             
-            {/* 404 Route */}
+            {/* ===== 404 FALLBACK ===== */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          
           <Footer />
+          
           <ToastContainer 
             position="top-right"
             autoClose={3000}
