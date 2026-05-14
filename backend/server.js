@@ -1,10 +1,11 @@
-const cateringRoutes = require('./routes/catering');
-const eventsRoutes = require('./routes/events');
-const contactRoutes = require('./routes/contact');
-const adminRoutes = require('./routes/admin');
+// ===== IMPORTS =====
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
 require('dotenv').config();
 
 const app = express();
@@ -18,44 +19,71 @@ console.log('🔌 Port:', process.env.PORT || 5010);
 console.log('═══════════════════════════════════════════════════════');
 console.log('');
 
-// ===== CORS Configuration - Allow GitHub Pages =====
-const allowedOrigins = [
-  'https://charmenarnext.github.io',
-  'https://charmenarnext.github.io/charmenar_next',
-  'http://localhost:3003',
-  'http://localhost:3000',
-  undefined  // Allow requests with no origin (curl, mobile, etc.)
-];
-
+// ===== CORS Configuration - Allow All Approved Origins =====
 app.use(cors({
   origin: [
     'https://charmenarnext.com',
-    'http://charmenarnext.com',
     'https://www.charmenarnext.com',
     'https://charmenarnext.github.io',
+    'https://charmenarnext.github.io/charmenar_next',
     'http://localhost:3003',
-    'http://localhost:5000'
+    'http://localhost:3000',
+    'http://localhost:5010'
   ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-// ===== Middleware =====
+// ===== Security Headers (Helmet) =====
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow GitHub Pages
+  contentSecurityPolicy: false, // Disable for API (handled by frontend)
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false
+}));
+
+// ===== Request Body Parsing =====
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Request logging middleware
+// ===== Input Sanitization (NoSQL Injection + XSS Prevention) =====
+app.use(mongoSanitize()); // Blocks $ and . in payloads
+app.use(xss()); // Sanitizes HTML/script tags
+
+// ===== Request Logging Middleware =====
 app.use((req, res, next) => {
-  console.log(`📥 ${req.method} ${req.originalUrl} from ${req.ip}`);
+  console.log(`📥 ${req.method} ${req.originalUrl} from ${req.ip || req.socket.remoteAddress}`);
   next();
 });
 
-// ===== Routes =====
+// ===== Rate Limiting =====
+
+// General API limiter (100 requests per 15 minutes)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { success: false, message: 'Too many requests. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/', apiLimiter);
+
+// Stricter limiter for auth/OTP endpoints (5 attempts per 10 minutes)
+const authLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  message: { success: false, message: 'Too many login attempts. Wait 10 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/auth/', authLimiter);
+
+// ===== ROUTES =====
 console.log('📦 Loading routes...');
 console.log('');
 
-// Auth routes - MUST be loaded first
+// Auth routes (MUST be loaded first)
 try {
   const authRoutes = require('./routes/auth');
   app.use('/api/auth', authRoutes);
@@ -67,21 +95,19 @@ try {
   console.log('   → GET  /api/auth/me');
 } catch (error) {
   console.error('❌ Failed to load auth routes:', error.message);
-  console.error('   Stack:', error.stack);
 }
-
 console.log('');
 
-app.use('/api/catering', cateringRoutes);
-app.use('/api/events', eventsRoutes);
-app.use('/api/contact', contactRoutes);
-app.use('/api/admin', adminRoutes);
+// Catering routes
+try {
+  const cateringRoutes = require('./routes/catering');
+  app.use('/api/catering', cateringRoutes);
+  console.log('✅ Catering routes loaded: /api/catering');
+} catch (error) {
+  console.error('❌ Failed to load catering routes:', error.message);
+}
 
-console.log('✅ Catering routes registered');
-console.log('✅ Events routes registered');
-console.log('✅ Contact routes registered');
-console.log('✅ Admin routes registered');
-// Events routes
+// Events routes (FIXED: Removed duplicate registration)
 try {
   const eventsRoutes = require('./routes/events');
   app.use('/api/events', eventsRoutes);
@@ -92,9 +118,26 @@ try {
   console.error('❌ Failed to load events routes:', error.message);
 }
 
+// Contact routes
+try {
+  const contactRoutes = require('./routes/contact');
+  app.use('/api/contact', contactRoutes);
+  console.log('✅ Contact routes loaded: /api/contact');
+} catch (error) {
+  console.error('❌ Failed to load contact routes:', error.message);
+}
+
+// Admin routes
+try {
+  const adminRoutes = require('./routes/admin');
+  app.use('/api/admin', adminRoutes);
+  console.log('✅ Admin routes loaded: /api/admin');
+} catch (error) {
+  console.error('❌ Failed to load admin routes:', error.message);
+}
 console.log('');
 
-// ===== Health Check Endpoint =====
+// ===== HEALTH CHECK ENDPOINT =====
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
@@ -102,15 +145,19 @@ app.get('/api/health', (req, res) => {
     port: process.env.PORT || 5010,
     environment: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
     routes: {
       auth: '/api/auth',
+      catering: '/api/catering',
       events: '/api/events',
+      contact: '/api/contact',
+      admin: '/api/admin',
       health: '/api/health'
     }
   });
 });
 
-// ===== Root Endpoint =====
+// ===== ROOT ENDPOINT =====
 app.get('/', (req, res) => {
   res.json({
     name: 'Charmenar Next API',
@@ -120,34 +167,39 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/api/health',
       auth: '/api/auth',
-      events: '/api/events'
+      catering: '/api/catering',
+      events: '/api/events',
+      contact: '/api/contact',
+      admin: '/api/admin'
     }
   });
 });
 
-// ===== DEBUG ENDPOINTS (for testing - remove in production) =====
-app.get('/api/debug/check', (req, res) => {
-  console.log('🧪 [DEBUG] Check endpoint hit');
-  res.json({
-    success: true,
-    message: 'Backend is alive and responding!',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-    port: process.env.PORT || 5010
+// ===== DEBUG ENDPOINTS (Production-Safe: Only in Development) =====
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/api/debug/check', (req, res) => {
+    console.log('🧪 [DEBUG] Check endpoint hit');
+    res.json({
+      success: true,
+      message: 'Backend is alive and responding!',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      port: process.env.PORT || 5010
+    });
   });
-});
 
-app.post('/api/debug/test', (req, res) => {
-  console.log('🧪 [DEBUG] Test endpoint hit!', req.body);
-  res.json({
-    success: true,
-    message: 'Backend received your request!',
-    received: req.body,
-    timestamp: new Date().toISOString()
+  app.post('/api/debug/test', (req, res) => {
+    console.log('🧪 [DEBUG] Test endpoint hit!', req.body);
+    res.json({
+      success: true,
+      message: 'Backend received your request!',
+      received: req.body,
+      timestamp: new Date().toISOString()
+    });
   });
-});
+}
 
-// ===== 404 Handler (MUST be after all routes) =====
+// ===== 404 HANDLER (MUST be after all routes) =====
 app.use((req, res, next) => {
   console.warn(`⚠️  404: Route not found - ${req.method} ${req.originalUrl}`);
   res.status(404).json({
@@ -158,20 +210,25 @@ app.use((req, res, next) => {
     availableRoutes: [
       'GET  /',
       'GET  /api/health',
-      'GET  /api/debug/check',
-      'POST /api/debug/test',
       'POST /api/auth/admin/request-otp',
       'POST /api/auth/admin/login',
       'POST /api/auth/register',
       'POST /api/auth/login',
       'GET  /api/auth/me',
+      'POST /api/catering/submit',
+      'GET  /api/catering',
       'POST /api/events/submit',
-      'GET  /api/events'
+      'GET  /api/events',
+      'POST /api/contact/submit',
+      'GET  /api/admin/stats',
+      'GET  /api/admin/bookings',
+      'PATCH /api/admin/bookings/:id/status',
+      'DELETE /api/admin/bookings/:id'
     ]
   });
 });
 
-// ===== Global Error Handler (MUST be last) =====
+// ===== GLOBAL ERROR HANDLER (MUST be last) =====
 app.use((err, req, res, next) => {
   console.error('');
   console.error('🔥 Global Error Handler:');
@@ -207,15 +264,15 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Default error
+  // Default error - hide stack in production
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || 'Internal server error',
+    message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
     error: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });
 
-// ===== MongoDB Connection =====
+// ===== MONGODB CONNECTION =====
 const PORT = process.env.PORT || 5010;
 const MONGO_URI = process.env.MONGODB_URI;
 
@@ -229,7 +286,7 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-// Mask password in logs
+// Mask password in logs for security
 const maskedUri = MONGO_URI.replace(/:[^:]+@/, ':****@');
 console.log('📊 Connection String:', maskedUri);
 console.log('');
@@ -237,6 +294,7 @@ console.log('');
 mongoose.connect(MONGO_URI, {
   serverSelectionTimeoutMS: 30000,
   socketTimeoutMS: 45000,
+  maxPoolSize: 10,
 })
   .then(() => {
     console.log('');
@@ -259,15 +317,20 @@ mongoose.connect(MONGO_URI, {
       console.log('');
       console.log('📦 Available Endpoints:');
       console.log('   GET  /api/health');
-      console.log('   GET  /api/debug/check');
-      console.log('   POST /api/debug/test');
       console.log('   POST /api/auth/admin/request-otp');
       console.log('   POST /api/auth/admin/login');
       console.log('   POST /api/auth/register');
       console.log('   POST /api/auth/login');
       console.log('   GET  /api/auth/me');
+      console.log('   POST /api/catering/submit');
+      console.log('   GET  /api/catering');
       console.log('   POST /api/events/submit');
       console.log('   GET  /api/events');
+      console.log('   POST /api/contact/submit');
+      console.log('   GET  /api/admin/stats');
+      console.log('   GET  /api/admin/bookings');
+      console.log('   PATCH /api/admin/bookings/:id/status');
+      console.log('   DELETE /api/admin/bookings/:id');
       console.log('═══════════════════════════════════════════════════════');
       console.log('');
     });
@@ -288,7 +351,7 @@ mongoose.connect(MONGO_URI, {
     }, 10000);
   });
 
-// ===== Graceful Shutdown =====
+// ===== GRACEFUL SHUTDOWN =====
 process.on('SIGINT', async () => {
   console.log('');
   console.log('🛑 Received SIGINT. Shutting down gracefully...');
@@ -307,14 +370,14 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-// Handle unhandled promise rejections
+// Handle unhandled promise rejections (don't crash the server)
 process.on('unhandledRejection', (reason, promise) => {
   console.error('');
   console.error('💥 Unhandled Promise Rejection:');
-  console.error('   Promise:', promise);
   console.error('   Reason:', reason);
   console.error('');
   // Don't exit - let the app continue running
 });
 
+// Export app for testing
 module.exports = app;
