@@ -80,7 +80,7 @@ const AdminLogin = () => {
             <form onSubmit={handleRequestOTP} className="admin-form">
               <div className="form-group">
                 <label><FiMail /> Admin Email</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="charmenarnext@gmail.com" required />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@gmail.com" required />
               </div>
               <button type="submit" className="admin-btn" disabled={loading}>
                 {loading ? 'Sending OTP...' : 'Get OTP'}
