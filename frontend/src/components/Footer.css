@@ -167,3 +167,110 @@
     gap: 10px;
   }
 }
+
+/* ===== MOBILE FOOTER CENTER ALIGNMENT ===== */
+@media (max-width: 768px) {
+  .footer {
+    text-align: center !important;
+  }
+
+  .footer-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 40px 20px !important;
+  }
+
+  .footer-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 30px !important;
+    text-align: center !important;
+  }
+
+  .footer-logo {
+    justify-content: center !important;
+    margin-bottom: 15px !important;
+  }
+
+  .footer-logo-text {
+    text-align: center !important;
+  }
+
+  .footer-section h3,
+  .footer-section h4 {
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
+  .footer-section p {
+    text-align: center !important;
+  }
+
+  .footer-links {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .footer-links a {
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .social-links {
+    justify-content: center !important;
+    gap: 15px !important;
+  }
+
+  .social-links a {
+    margin: 0 5px !important;
+  }
+
+  .footer-bottom {
+    text-align: center !important;
+    justify-content: center !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .footer-bottom p {
+    text-align: center !important;
+  }
+
+  .footer-divider {
+    margin: 20px auto !important;
+    width: 80% !important;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 480px) {
+  .footer-container {
+    padding: 30px 15px !important;
+  }
+
+  .footer-section {
+    margin-bottom: 25px !important;
+  }
+
+  .footer-logo-img {
+    height: 40px !important;
+  }
+
+  .footer-logo-text {
+    font-size: 1.2rem !important;
+  }
+
+  .footer-section h3,
+  .footer-section h4 {
+    font-size: 1.1rem !important;
+  }
+
+  .footer-section p,
+  .footer-links a {
+    font-size: 0.9rem !important;
+  }
+}
