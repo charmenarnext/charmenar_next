@@ -49,28 +49,12 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 };
 
 // ==========================================
-// AUTO-DETECT BASENAME FOR GITHUB PAGES
-// ==========================================
-const getBasename = () => {
-  // Local development: no basename
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return '/';
-  }
-  
-  // GitHub Pages: use /charmenar_next as basename
-  if (window.location.hostname.includes('github.io')) {
-    return '/charmenar_next';
-  }
-  
-  // Custom domain: no basename (root path)
-  return '/';
-};
-
-// ==========================================
 // MAIN APP COMPONENT
 // ==========================================
 function App() {
-  const basename = getBasename();
+  // ✅ SIMPLIFIED: Use root basename for ALL environments
+  // Relative paths (homepage: ".") handle asset loading
+  const basename = '/';
 
   return (
     <AuthProvider>
