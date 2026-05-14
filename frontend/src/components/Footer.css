@@ -149,6 +149,9 @@
   font-size: 14px;
 }
 
+/* ==========================================
+   MOBILE FOOTER FIXES - IMPROVED SPACING
+   ========================================== */
 @media (max-width: 768px) {
   .footer {
     padding: 60px 0 20px;
@@ -157,14 +160,103 @@
   .footer-content {
     grid-template-columns: 1fr;
     gap: 40px;
+    padding: 0 20px !important; /* Add horizontal padding */
+  }
+
+  .footer-section {
+    padding: 0 10px; /* Add slight padding to sections */
+    text-align: left; /* Keep left alignment on mobile */
+  }
+
+  .footer-logo {
+    justify-content: flex-start; /* Align logo to left */
+    padding-left: 5px; /* Extra space from left edge */
   }
 
   .footer-logo-img {
     height: 50px;
   }
 
+  /* Center section titles but keep them aligned with content */
+  .footer-section h3 {
+    text-align: left;
+    padding-left: 5px;
+  }
+
+  .footer-section h3::after {
+    left: 5px; /* Adjust line position */
+  }
+
+  /* Social icons - center them but with padding */
+  .footer-social {
+    justify-content: flex-start;
+    padding-left: 5px;
+    gap: 15px;
+  }
+
+  /* Contact list - add left padding */
+  .contact-list {
+    padding-left: 5px;
+  }
+
   .contact-list li {
     gap: 10px;
+    padding-left: 5px;
+  }
+
+  /* Quick links - add left padding */
+  .footer-section ul {
+    padding-left: 5px;
+  }
+
+  /* Footer bottom - ensure proper spacing */
+  .footer-bottom {
+    padding: 30px 20px 0;
+    margin-top: 20px;
   }
 }
 
+/* Extra Small Mobile - Even more spacing */
+@media (max-width: 480px) {
+  .footer-content {
+    padding: 0 15px !important; /* More padding on very small screens */
+    gap: 35px;
+  }
+
+  .footer-section {
+    padding: 0 5px;
+  }
+
+  .footer-logo {
+    padding-left: 0; /* Reset on very small screens */
+  }
+
+  .footer-section h3 {
+    padding-left: 0;
+  }
+
+  .footer-section h3::after {
+    left: 0;
+  }
+
+  .footer-social {
+    padding-left: 0;
+    justify-content: center; /* Center social icons on small screens */
+  }
+
+  .contact-list {
+    padding-left: 0;
+  }
+
+  .contact-list li {
+    padding-left: 0;
+  }
+
+  .footer-section ul {
+    padding-left: 0;
+  }
+
+  .footer-bottom {
+    padding: 30px 15px 0;
+  }
+}
