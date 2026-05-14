@@ -410,3 +410,138 @@
     margin-bottom: 5px !important;
   }
 }
+
+/* ==========================================
+   MOBILE FOOTER "NUCLEAR" FIX
+   ========================================== */
+@media (max-width: 768px) {
+  
+  /* 1. FORCE CENTER ALIGNMENT ON EVERYTHING */
+  .footer, footer, .footer-container, .footer-content {
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 40px 20px !important;
+  }
+
+  /* 2. HIDE THE PROBLEMATIC PURPLE/BLUE LINES */
+  /* This targets lines created by pseudo-elements or specific classes */
+  .footer h3::before, 
+  .footer h4::before, 
+  .footer .section-title::before,
+  .footer .underline,
+  .footer .divider,
+  .footer .line {
+    display: none !important;
+  }
+
+  /* 3. FIX SECTION TITLES */
+  .footer h3, 
+  .footer h4, 
+  .footer-title, 
+  .footer-heading {
+    text-align: center !important;
+    margin: 0 auto 20px auto !important;
+    width: 100% !important;
+    display: block !important;
+  }
+
+  /* 4. FIX SOCIAL MEDIA ICONS */
+  .footer .social-links, 
+  .footer .social-icons, 
+  .footer .social-media {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 15px !important; /* Consistent spacing */
+    margin: 20px auto !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .footer .social-links a, 
+  .footer .social-icons a {
+    margin: 0 !important; /* Remove individual margins */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* 5. FIX QUICK LINKS & SERVICES LISTS */
+  .footer ul, 
+  .footer .links-list, 
+  .footer .services-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+
+  .footer li {
+    text-align: center !important;
+    width: 100% !important;
+    margin-bottom: 10px !important;
+  }
+
+  .footer li a {
+    display: inline-block !important;
+    text-align: center !important;
+  }
+
+  /* 6. FIX CONTACT US DATA */
+  .footer .contact-info, 
+  .footer .contact-details,
+  .footer .address-section {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 15px !important;
+    width: 100% !important;
+    margin-top: 20px !important;
+  }
+
+  /* Force each contact item (Icon + Text) to stack vertically for better mobile fit */
+  .footer .contact-item, 
+  .footer .info-item,
+  .footer p {
+    display: flex !important;
+    flex-direction: column !important; /* Stack icon on top of text */
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 5px 0 !important;
+  }
+
+  .footer .contact-item svg, 
+  .footer .info-item svg,
+  .footer .icon {
+    margin-bottom: 5px !important; /* Space between icon and text */
+    font-size: 18px !important;
+  }
+
+  .footer .contact-item span,
+  .footer .contact-item a,
+  .footer .info-item span,
+  .footer .info-item a {
+    word-break: break-word !important; /* Break long emails/addresses */
+    text-align: center !important;
+  }
+
+  /* 7. FIX FOOTER BOTTOM (Copyright) */
+  .footer-bottom, 
+  .copyright {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    margin-top: 30px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+}
