@@ -169,108 +169,244 @@
 }
 
 /* ===== MOBILE FOOTER CENTER ALIGNMENT ===== */
+/* ===== MOBILE FOOTER FIXES ===== */
 @media (max-width: 768px) {
   .footer {
-    text-align: center !important;
+    text-align: center;
+    padding: 40px 0 20px !important;
   }
 
   .footer-container {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    justify-content: center !important;
     text-align: center !important;
-    padding: 40px 20px !important;
+    padding: 0 20px !important;
+    gap: 40px !important;
   }
 
+  /* Footer Sections */
   .footer-section {
     width: 100% !important;
-    max-width: 100% !important;
-    margin-bottom: 30px !important;
+    max-width: 400px !important;
+    margin: 0 auto !important;
     text-align: center !important;
+    position: relative !important;
+    padding: 0 !important;
   }
 
-  .footer-logo {
-    justify-content: center !important;
-    margin-bottom: 15px !important;
+  /* Remove or center decorative lines on mobile */
+  .footer-section::before,
+  .footer-section::after,
+  .footer-section h3::before,
+  .footer-section h4::before {
+    display: none !important; /* Hide decorative lines on mobile */
   }
 
-  .footer-logo-text {
-    text-align: center !important;
+  /* Alternative: If you want to keep lines, center them */
+  /*
+  .footer-section::before,
+  .footer-section::after {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+    width: 60px !important;
   }
+  */
 
+  /* Section Titles */
   .footer-section h3,
   .footer-section h4 {
     text-align: center !important;
     justify-content: center !important;
+    margin-bottom: 20px !important;
+    position: relative !important;
+    padding-left: 0 !important;
   }
 
-  .footer-section p {
+  /* Logo Section */
+  .footer-logo {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
     text-align: center !important;
+    margin-bottom: 20px !important;
   }
 
+  .footer-logo-img {
+    height: 60px !important;
+    width: auto !important;
+    margin-bottom: 15px !important;
+  }
+
+  .footer-logo-text {
+    font-size: 1.5rem !important;
+    text-align: center !important;
+    margin-bottom: 10px !important;
+  }
+
+  .footer-tagline {
+    font-size: 1rem !important;
+    text-align: center !important;
+    margin-bottom: 20px !important;
+  }
+
+  .footer-description {
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+    text-align: center !important;
+    max-width: 100% !important;
+  }
+
+  /* Social Media Icons */
+  .social-links {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 15px !important;
+    margin: 20px 0 !important;
+    flex-wrap: wrap !important;
+  }
+
+  .social-links a {
+    width: 50px !important;
+    height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important; /* Remove individual margins */
+  }
+
+  .social-links a svg {
+    font-size: 20px !important;
+  }
+
+  /* Quick Links */
   .footer-links {
+    display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     gap: 12px !important;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .footer-links li {
+    width: 100% !important;
+    text-align: center !important;
   }
 
   .footer-links a {
+    display: inline-block !important;
+    text-align: center !important;
+    padding: 5px 0 !important;
+    width: auto !important;
+  }
+
+  /* Services List */
+  .footer-section ul,
+  .services-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .footer-section ul li,
+  .services-list li {
     text-align: center !important;
     width: 100% !important;
   }
 
-  .social-links {
-    justify-content: center !important;
+  /* Contact Info */
+  .contact-info {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
     gap: 15px !important;
+    margin-top: 20px !important;
   }
 
-  .social-links a {
-    margin: 0 5px !important;
+  .contact-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important; /* Center the whole item */
+    gap: 10px !important;
+    width: 100% !important;
+    text-align: center !important;
+    flex-wrap: wrap !important; /* Allow wrapping on small screens */
   }
 
+  .contact-item svg {
+    font-size: 18px !important;
+    flex-shrink: 0 !important;
+    min-width: 20px !important;
+  }
+
+  .contact-item span,
+  .contact-item a {
+    text-align: center !important;
+    word-break: break-word !important; /* Break long emails/addresses */
+  }
+
+  /* Footer Bottom */
   .footer-bottom {
+    width: 100% !important;
+    max-width: 100% !important;
     text-align: center !important;
     justify-content: center !important;
-    flex-direction: column !important;
-    gap: 10px !important;
+    padding: 20px 20px 0 !important;
+    margin-top: 40px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
 
   .footer-bottom p {
     text-align: center !important;
+    margin: 0 !important;
+    font-size: 0.85rem !important;
   }
 
+  /* Footer Divider */
   .footer-divider {
-    margin: 20px auto !important;
-    width: 80% !important;
+    display: none !important; /* Hide decorative dividers on mobile */
   }
 }
 
 /* Extra Small Mobile */
 @media (max-width: 480px) {
   .footer-container {
-    padding: 30px 15px !important;
+    padding: 0 15px !important;
+    gap: 30px !important;
   }
 
   .footer-section {
-    margin-bottom: 25px !important;
-  }
-
-  .footer-logo-img {
-    height: 40px !important;
+    max-width: 100% !important;
   }
 
   .footer-logo-text {
-    font-size: 1.2rem !important;
+    font-size: 1.3rem !important;
   }
 
-  .footer-section h3,
-  .footer-section h4 {
-    font-size: 1.1rem !important;
-  }
-
-  .footer-section p,
-  .footer-links a {
+  .footer-tagline {
     font-size: 0.9rem !important;
+  }
+
+  .social-links a {
+    width: 45px !important;
+    height: 45px !important;
+  }
+
+  .contact-item {
+    flex-direction: column !important; /* Stack icon and text vertically */
+    gap: 5px !important;
+  }
+
+  .contact-item svg {
+    margin-bottom: 5px !important;
   }
 }
