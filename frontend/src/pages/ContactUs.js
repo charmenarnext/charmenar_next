@@ -89,7 +89,7 @@ const ContactUs = () => {
               <div className="contact-details">
                 <h3>Call Us</h3>
                 <p>
-                  <a href="tel:9124470079">9124470079</a><br />
+                  <a href="tel:09124470079">091244 70079</a><br />
                   Mon - Sat: 9:00 AM - 8:00 PM
                 </p>
               </div>
